@@ -1,0 +1,132 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+.driver-dashboard{
+  display:flex;
+  min-height:100vh;
+  background:#f5f7fb;
+}
+
+/* SIDEBAR */
+
+.driver-sidebar{
+  width:260px;
+  background:#0f172a;
+  color:white;
+  padding:30px 20px;
+}
+
+.driver-sidebar h2{
+  margin-bottom:40px;
+  font-size:28px;
+}
+
+.driver-sidebar ul{
+  list-style:none;
+}
+
+.driver-sidebar li{
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.driver-sidebar li:hover{
+  background:#1e293b;
+}
+
+/* MAIN */
+
+.driver-main{
+  flex:1;
+  padding:30px;
+}
+
+.driver-topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:30px;
+}
+
+.driver-topbar h1{
+  color:#0f172a;
+}
+
+.driver-topbar button{
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+}
+
+/* CARDS */
+
+.driver-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:40px;
+}
+
+.driver-card{
+  padding:25px;
+  border-radius:18px;
+  color:white;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.driver-card h3{
+  margin-bottom:10px;
+}
+
+.driver-card p{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.green{
+  background:#22c55e;
+}
+
+.blue{
+  background:#2563eb;
+}
+
+.white{
+  background:white;
+  color:#111827;
+}
+
+/* TABLE */
+
+.trip-section{
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.trip-section h2{
+  margin-bottom:20px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  text-align:left;
+  padding:15px;
+  border-bottom:1px solid #e5e7eb;
+}

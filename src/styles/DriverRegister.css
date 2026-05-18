@@ -1,0 +1,163 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+.register-container{
+  width:100%;
+  height:100vh;
+  display:flex;
+}
+
+/* LEFT SECTION */
+
+.register-left{
+  flex:1;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  color:white;
+
+  background:
+  linear-gradient(
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.55)
+  ),
+
+  url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070")
+  center/cover no-repeat;
+}
+
+.left-content{
+  width:70%;
+}
+
+.left-content h1{
+  font-size:56px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.left-content p{
+  font-size:20px;
+  line-height:1.7;
+  color:#e5e7eb;
+}
+
+/* RIGHT SECTION */
+
+.register-right{
+  flex:1;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  background:#f5f7fa;
+}
+
+.register-card{
+
+  width:430px;
+
+  background:white;
+
+  padding:40px;
+
+  border-radius:20px;
+
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.register-card h2{
+
+  text-align:center;
+
+  font-size:42px;
+
+  color:#111827;
+
+  margin-bottom:8px;
+}
+
+.sub-title{
+
+  text-align:center;
+
+  color:#6b7280;
+
+  margin-bottom:30px;
+
+  font-size:17px;
+}
+
+.input-group{
+  margin-bottom:20px;
+}
+
+.input-group label{
+
+  display:block;
+
+  margin-bottom:8px;
+
+  font-size:15px;
+
+  font-weight:500;
+
+  color:#374151;
+}
+
+.input-group input{
+
+  width:100%;
+
+  padding:14px;
+
+  border:1px solid #d1d5db;
+
+  border-radius:10px;
+
+  font-size:15px;
+
+  outline:none;
+
+  transition:0.3s;
+}
+
+.input-group input:focus{
+  border-color:#2563eb;
+}
+
+.register-btn{
+
+  width:100%;
+
+  padding:15px;
+
+  border:none;
+
+  border-radius:10px;
+
+  background:#22c55e;
+
+  color:white;
+
+  font-size:18px;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  margin-top:10px;
+
+  transition:0.3s;
+}
+
+.register-btn:hover{
+  opacity:0.95;
+}

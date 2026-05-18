@@ -33,8 +33,9 @@ async def create_indexes():
     """Create necessary indexes for performance and uniqueness."""
     database = get_database()
 
-    # users — email must be unique across the entire collection
+    # users — email and phone must be unique across the entire collection
     await database.users.create_index("email", unique=True)
+    await database.users.create_index("phone", unique=True)
     await database.users.create_index("role")
 
     # trucks — registration number must be globally unique

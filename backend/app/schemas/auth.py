@@ -5,7 +5,9 @@ These are NOT the DB models — they define what the API accepts and returns.
 from datetime import datetime
 from typing import Optional
 
+import re
 from pydantic import BaseModel, EmailStr, field_validator
+from email_validator import validate_email, EmailNotValidError
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -21,11 +23,28 @@ class OwnerRegisterRequest(BaseModel):
     company_name: str
     gst_number: Optional[str] = None
 
+    @field_validator("email")
+    @classmethod
+    def email_deliverability(cls, v: str) -> str:
+        try:
+            emailinfo = validate_email(v, check_deliverability=True)
+            return emailinfo.normalized
+        except EmailNotValidError as e:
+            raise ValueError(str(e))
+
     @field_validator("password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters long")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one number")
+        if not re.search(r"[@$!%*?&#^]", v):
+            raise ValueError("Password must contain at least one special character")
         return v
 
     @field_validator("phone")
@@ -53,11 +72,28 @@ class DriverCreateRequest(BaseModel):
     license_number: str
     license_expiry: Optional[datetime] = None
 
+    @field_validator("email")
+    @classmethod
+    def email_deliverability(cls, v: str) -> str:
+        try:
+            emailinfo = validate_email(v, check_deliverability=True)
+            return emailinfo.normalized
+        except EmailNotValidError as e:
+            raise ValueError(str(e))
+
     @field_validator("password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters long")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one number")
+        if not re.search(r"[@$!%*?&#^]", v):
+            raise ValueError("Password must contain at least one special character")
         return v
 
 
@@ -67,7 +103,14 @@ class DriverCreateRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     """Body for POST /api/auth/login"""
-    email: EmailStr
+    @field_validator("email")
+    @classmethod
+    def email_deliverability(cls, v: str) -> str:
+        try:
+            emailinfo = validate_email(v, check_deliverability=True)
+            return emailinfo.normalized
+        except EmailNotValidError as e:
+            raise ValueError(str(e))
     password: str
 
 

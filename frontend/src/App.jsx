@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import RoleSelection from "./pages/RoleSelection";
 import AdminLogin from "./pages/AdminLogin";
+import AdminRegister from "./pages/AdminRegister";
 import DriverLogin from "./pages/DriverLogin";
 import DriverRegister from "./pages/DriverRegister";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -18,6 +19,8 @@ function App() {
         <Route path="/" element={<RoleSelection />} />
 
         <Route path="/admin-login" element={<AdminLogin />} />
+
+        <Route path="/admin-register" element={<AdminRegister />} />
 
         <Route path="/driver-login" element={<DriverLogin />} />
 

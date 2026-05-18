@@ -33,12 +33,20 @@ async def register_owner(data: OwnerRegisterRequest, db: AsyncIOMotorDatabase) -
     Create a new owner account.
     Raises 409 if email already exists.
     """
-    existing = await db.users.find_one({"email": data.email})
+    existing = await db.users.find_one({
+        "$or": [{"email": data.email}, {"phone": data.phone}]
+    })
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this email already exists.",
-        )
+        if existing.get("email") == data.email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An account with this email already exists.",
+            )
+        if existing.get("phone") == data.phone:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An account with this phone number already exists.",
+            )
 
     user_doc = {
         "name": data.name,
@@ -84,12 +92,20 @@ async def create_driver(
             detail="Only owners can create driver accounts.",
         )
 
-    existing = await db.users.find_one({"email": data.email})
+    existing = await db.users.find_one({
+        "$or": [{"email": data.email}, {"phone": data.phone}]
+    })
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="A user with this email already exists.",
-        )
+        if existing.get("email") == data.email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with this email already exists.",
+            )
+        if existing.get("phone") == data.phone:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with this phone number already exists.",
+            )
 
     driver_doc = {
         "name": data.name,

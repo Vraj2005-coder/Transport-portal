@@ -1,37 +1,89 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import RoleSelection from "./pages/RoleSelection";
-import AdminLogin from "./pages/AdminLogin";
-import AdminRegister from "./pages/AdminRegister";
-import DriverLogin from "./pages/DriverLogin";
-import DriverRegister from "./pages/DriverRegister";
-import AdminDashboard from "./pages/AdminDashboard";
-import DriverDashboard from "./pages/DriverDashboard";
+
+/* ADMIN PAGES */
+
+import AdminLogin from "./pages/Admin/AdminLogin";
+import AdminRegister from "./pages/Admin/AdminRegister";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import Vehicles from "./pages/Admin/Vehicles";
+import VehicleDetails from "./pages/Admin/VehicleDetails";
+
+/* DRIVER PAGES */
+
+import DriverLogin from "./pages/Driver/DriverLogin";
+import DriverRegister from "./pages/Driver/DriverRegister";
+import DriverDashboard from "./pages/Driver/DriverDashboard";
+
+import "./App.css";
 
 function App() {
 
   return (
 
-    <BrowserRouter>
+    <div className="app">
 
-      <Routes>
+      <BrowserRouter>
 
-        <Route path="/" element={<RoleSelection />} />
+        <Routes>
 
-        <Route path="/admin-login" element={<AdminLogin />} />
+          {/* HOME */}
 
-        <Route path="/admin-register" element={<AdminRegister />} />
+          <Route
+            path="/"
+            element={<RoleSelection />}
+          />
 
-        <Route path="/driver-login" element={<DriverLogin />} />
+          {/* ADMIN ROUTES */}
 
-        <Route path="/driver-register" element={<DriverRegister />} />
-         
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route
+            path="/admin-login"
+            element={<AdminLogin />}
+          />
 
-        <Route path="/driver-dashboard" element={<DriverDashboard />} />
-      </Routes>
+          <Route
+            path="/admin-register"
+            element={<AdminRegister />}
+          />
 
-    </BrowserRouter>
+          <Route
+            path="/admin-dashboard"
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/vehicles"
+            element={<Vehicles />}
+          />
+
+          <Route
+            path="/vehicle-details"
+            element={<VehicleDetails />}
+          />
+
+          {/* DRIVER ROUTES */}
+
+          <Route
+            path="/driver-login"
+            element={<DriverLogin />}
+          />
+
+          <Route
+            path="/driver-register"
+            element={<DriverRegister />}
+          />
+
+          <Route
+            path="/driver-dashboard"
+            element={<DriverDashboard />}
+          />
+
+        </Routes>
+
+      </BrowserRouter>
+
+    </div>
 
   );
 }

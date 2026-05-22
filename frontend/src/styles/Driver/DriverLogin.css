@@ -9,7 +9,11 @@
   height:100vh;
 
   background:
-  linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+  linear-gradient(
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.55)
+  ),
+
   url("https://images.unsplash.com/photo-1494412651409-8963ce7935a7?q=80&w=2070")
   center/cover no-repeat;
 
@@ -20,6 +24,7 @@
 
 .driver-overlay{
   width:85%;
+
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -37,8 +42,8 @@
 
 .driver-left p{
   font-size:20px;
-  line-height:1.6;
-  color:#ddd;
+  line-height:1.7;
+  color:#e5e7eb;
 }
 
 .driver-login-card{
@@ -46,23 +51,25 @@
 
   padding:40px;
 
+  border-radius:20px;
+
   background:rgba(255,255,255,0.12);
+
   backdrop-filter:blur(12px);
 
-  border-radius:20px;
   color:white;
 }
 
 .driver-login-card h2{
   text-align:center;
+  font-size:36px;
   margin-bottom:10px;
-  font-size:38px;
 }
 
-.driver-login-card p{
+.sub-text{
   text-align:center;
   margin-bottom:30px;
-  color:#ddd;
+  color:#d1d5db;
 }
 
 .driver-login-card form{
@@ -73,30 +80,71 @@
 
 .driver-login-card input{
   padding:15px;
+
   border:none;
   border-radius:10px;
+
   font-size:16px;
+  outline:none;
 }
 
 .driver-login-card button{
   padding:15px;
+
   border:none;
   border-radius:10px;
 
   background:#2563eb;
+
   color:white;
 
-  font-size:18px;
+  font-size:17px;
+  font-weight:600;
+
   cursor:pointer;
+
+  transition:0.3s;
+}
+
+.driver-login-card button:hover{
+  background:#1d4ed8;
+}
+
+.driver-login-card button:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+.error-box{
+  background:#fee2e2;
+  color:#dc2626;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  margin-bottom:20px;
+
+  font-size:14px;
+  text-align:center;
 }
 
 .register-link{
-  margin-top:20px;
+  margin-top:22px;
   text-align:center;
+}
+
+.register-link p{
+  color:#e5e7eb;
+  font-size:15px;
 }
 
 .register-link a{
   color:#22c55e;
   text-decoration:none;
-  font-weight:bold;
+  font-weight:600;
+}
+
+.register-link a:hover{
+  text-decoration:underline;
 }

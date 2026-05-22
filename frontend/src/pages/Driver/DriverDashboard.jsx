@@ -1,4 +1,5 @@
-import "../styles/DriverDashboard.css";
+import "../../styles/Driver/DriverDashboard.css";
+
 
 function DriverDashboard() {
 

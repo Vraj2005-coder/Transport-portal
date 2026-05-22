@@ -102,6 +102,10 @@ class DriverCreateRequest(BaseModel):
 # ──────────────────────────────────────────────────────────────────────────────
 
 class LoginRequest(BaseModel):
+
+    email: EmailStr
+    password: str
+    
     """Body for POST /api/auth/login"""
     @field_validator("email")
     @classmethod

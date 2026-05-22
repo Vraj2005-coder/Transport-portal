@@ -45,6 +45,7 @@ async def create_vehicle(
         "insurance": data.insurance,
         "permit": data.permit,
         "fitness": data.fitness,
+        "puc": data.puc,
         "status": data.status,
         "location": data.location,
         "created_at": now,
@@ -196,3 +197,149 @@ async def get_expiring_documents_count(owner_id: str, db: AsyncIOMotorDatabase, 
         ],
     })
     return count
+
+
+async def get_enriched_dashboard_stats(owner_id: str, db: AsyncIOMotorDatabase) -> dict:
+    """
+    Compile detailed statistics for the admin dashboard:
+    - Available (Active), Booked, Maintenance vehicle counts
+    - Vehicle type distribution
+    - Document expiry alerts (for insurance, permit, fitness, puc within 30 days or past)
+    - Dynamic mock payments summary
+    - Upcoming driver duties list
+    """
+    # 1. Vehicle counts by status
+    available_vehicles = await db.vehicles.count_documents({"owner_id": owner_id, "status": "Active"})
+    booked_vehicles = await db.vehicles.count_documents({"owner_id": owner_id, "status": "Booked"})
+    maintenance_vehicles = await db.vehicles.count_documents({"owner_id": owner_id, "status": "Maintenance"})
+    total_vehicles = available_vehicles + booked_vehicles + maintenance_vehicles
+
+    # 2. Type distribution
+    pipeline = [
+        {"$match": {"owner_id": owner_id}},
+        {"$group": {"_id": "$type", "count": {"$sum": 1}}}
+    ]
+    type_distribution = {}
+    async for doc in db.vehicles.aggregate(pipeline):
+        t = doc["_id"] or "Unknown"
+        type_distribution[t] = doc["count"]
+
+    # 3. Document Expiry Alerts (Insurance, Permit, Fitness, PUC)
+    today_date = date.today()
+    cursor = db.vehicles.find({"owner_id": owner_id})
+    document_expiry_alerts = []
+    pending_docs_set = set() # Store vehicle ids with expiring/expired docs
+    
+    async for v in cursor:
+        v_num = v.get("number", "Unknown")
+        v_id = str(v.get("_id"))
+        doc_fields = [
+            ("Insurance", v.get("insurance")),
+            ("Permit", v.get("permit")),
+            ("Fitness", v.get("fitness")),
+            ("PUC", v.get("puc")),
+        ]
+        for label, date_str in doc_fields:
+            if not date_str:
+                continue
+            try:
+                exp_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                days_left = (exp_date - today_date).days
+                if days_left <= 30:
+                    status = "Expired" if days_left < 0 else "Expiring Soon"
+                    document_expiry_alerts.append({
+                        "vehicle_number": v_num,
+                        "doc_type": label,
+                        "expiry_date": date_str,
+                        "days_left": days_left,
+                        "status": status
+                    })
+                    pending_docs_set.add(v_id)
+            except Exception:
+                pass
+
+    # Sort alerts: expired first (most negative days_left), then soon-to-expire ascending
+    document_expiry_alerts.sort(key=lambda x: x["days_left"])
+
+    # 4. Dynamic payments summary based on vehicle status
+    pending_amount = 0.0
+    pending_count = 0
+    overdue_amount = 0.0
+    overdue_count = 0
+
+    # Booked -> Pending trip payment $1200
+    pending_amount += booked_vehicles * 1200.0
+    pending_count += booked_vehicles
+    
+    # Maintenance -> Overdue repair bill $650
+    overdue_amount += maintenance_vehicles * 650.0
+    overdue_count += maintenance_vehicles
+
+    # Deterministic active vehicle pending payments
+    cursor = db.vehicles.find({"owner_id": owner_id, "status": "Active"})
+    async for v in cursor:
+        v_num = v.get("number", "")
+        if sum(ord(c) for c in v_num) % 2 == 0:
+            pending_amount += 300.0
+            pending_count += 1
+
+    payments = {
+        "pending_amount": pending_amount,
+        "overdue_amount": overdue_amount,
+        "pending_count": pending_count,
+        "overdue_count": overdue_count
+    }
+
+    # 5. Upcoming driver duties
+    upcoming_duties = []
+    drivers_cursor = db.users.find({"role": "driver", "owner_id": owner_id, "is_active": True})
+    mock_routes = [
+        "Mumbai ➔ Pune",
+        "Delhi ➔ Jaipur",
+        "Bangalore ➔ Chennai",
+        "Hyderabad ➔ Vijayawada",
+        "Kolkata ➔ Haldia",
+        "Ahmedabad ➔ Surat",
+        "Pune Hub Delivery",
+        "Chennai Port Logistics"
+    ]
+    async for d in drivers_cursor:
+        assigned_truck_id = d.get("assigned_truck_id")
+        if assigned_truck_id:
+            try:
+                v = await db.vehicles.find_one({"_id": ObjectId(assigned_truck_id)})
+                if v:
+                    v_num = v.get("number", "Unknown")
+                    v_status = v.get("status", "Active")
+                    
+                    driver_name = d.get("name", "Unknown")
+                    route_idx = sum(ord(c) for c in driver_name) % len(mock_routes)
+                    route = mock_routes[route_idx]
+                    
+                    if v_status == "Booked":
+                        duty_status = "On Trip"
+                    elif v_status == "Maintenance":
+                        duty_status = "Suspended (Maintenance)"
+                    else:
+                        duty_status = "Ready"
+                        
+                    upcoming_duties.append({
+                        "driver_name": driver_name,
+                        "vehicle_number": v_num,
+                        "route": route,
+                        "status": duty_status
+                    })
+            except Exception:
+                pass
+
+    return {
+        "total_vehicles": total_vehicles,
+        "available_vehicles": available_vehicles,
+        "booked_vehicles": booked_vehicles,
+        "maintenance_vehicles": maintenance_vehicles,
+        "type_distribution": type_distribution,
+        "document_expiry_alerts": document_expiry_alerts,
+        "payments": payments,
+        "upcoming_duties": upcoming_duties,
+        "pending_documents_count": len(pending_docs_set)
+    }

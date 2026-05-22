@@ -24,7 +24,7 @@ function VehicleDetails() {
   const [vehicleData, setVehicleData] = useState(
     passedVehicle || {
       id: "", number: "", type: "", model: "",
-      driver: "", insurance: "", permit: "", fitness: "", status: "Active",
+      driver: "", insurance: "", permit: "", fitness: "", puc: "", status: "Active",
     }
   );
   const [drivers, setDrivers] = useState([]);
@@ -56,6 +56,7 @@ function VehicleDetails() {
         insurance: vehicleData.insurance,
         permit:    vehicleData.permit,
         fitness:   vehicleData.fitness,
+        puc:       vehicleData.puc,
         status:    vehicleData.status,
       });
       setVehicleData(updated);
@@ -180,6 +181,7 @@ function VehicleDetails() {
                   {field("Insurance Valid Till", "insurance")}
                   {field("Permit Valid Till",    "permit")}
                   {field("Fitness Valid Till",   "fitness")}
+                  {field("PUC Valid Till",       "puc")}
                   {editMode ? (
                     <div className="vd-detail-box">
                       <p>Status</p>
@@ -259,6 +261,7 @@ function VehicleDetails() {
                   { name: "Insurance",          date: vehicleData.insurance },
                   { name: "Permit",             date: vehicleData.permit    },
                   { name: "Fitness Certificate", date: vehicleData.fitness   },
+                  { name: "PUC Certificate",     date: vehicleData.puc       },
                 ].map((doc) => {
                   const isExpiring = doc.date && new Date(doc.date) <= new Date(Date.now() + 30 * 86400000);
                   const isExpired  = doc.date && new Date(doc.date) < new Date();

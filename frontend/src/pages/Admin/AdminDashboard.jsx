@@ -15,6 +15,13 @@ function AdminDashboard() {
     active_drivers: 0,
     trips_today: 0,
     pending_documents: 0,
+    available_vehicles: 0,
+    booked_vehicles: 0,
+    maintenance_vehicles: 0,
+    type_distribution: {},
+    document_expiry_alerts: [],
+    payments: { pending_amount: 0, overdue_amount: 0, pending_count: 0, overdue_count: 0 },
+    upcoming_duties: [],
   });
 
   const [activity, setActivity] = useState([]);
@@ -77,15 +84,183 @@ function AdminDashboard() {
             <p>{loading ? "—" : stats.trips_today}</p>
           </div>
 
-          <div className="card green">
+          <div className="card orange">
             <h3>Pending Documents</h3>
             <p>{loading ? "—" : stats.pending_documents}</p>
           </div>
 
         </div>
 
+        {/* ROW 2: LIVE STATUS & TYPES + PAYMENTS */}
+        <div className="dashboard-grid-row">
+          
+          <div className="dashboard-grid-col-2">
+            <div className="dashboard-split-box">
+              
+              {/* LIVE VEHICLE STATUS */}
+              <div className="dashboard-widget-panel">
+                <h2>Live Vehicle Status</h2>
+                <div className="status-bars">
+                  
+                  <div className="status-bar-item">
+                    <div className="status-bar-label">
+                      <span>Available Vehicles</span>
+                      <span className="count-label green-txt">{loading ? "—" : stats.available_vehicles}</span>
+                    </div>
+                    <div className="status-bar-bg">
+                      <div className="status-bar-fill green-bg" style={{ width: `${stats.total_vehicles ? (stats.available_vehicles / stats.total_vehicles) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="status-bar-item">
+                    <div className="status-bar-label">
+                      <span>Booked Vehicles</span>
+                      <span className="count-label blue-txt">{loading ? "—" : stats.booked_vehicles}</span>
+                    </div>
+                    <div className="status-bar-bg">
+                      <div className="status-bar-fill blue-bg" style={{ width: `${stats.total_vehicles ? (stats.booked_vehicles / stats.total_vehicles) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="status-bar-item">
+                    <div className="status-bar-label">
+                      <span>In Repair & Maintenance</span>
+                      <span className="count-label orange-txt">{loading ? "—" : stats.maintenance_vehicles}</span>
+                    </div>
+                    <div className="status-bar-bg">
+                      <div className="status-bar-fill orange-bg" style={{ width: `${stats.total_vehicles ? (stats.maintenance_vehicles / stats.total_vehicles) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* VEHICLE TYPE VIEW */}
+              <div className="dashboard-widget-panel">
+                <h2>Vehicle Type View</h2>
+                {loading ? (
+                  <p className="no-data-msg">Loading distribution...</p>
+                ) : Object.keys(stats.type_distribution || {}).length === 0 ? (
+                  <p className="no-data-msg">No vehicle types registered.</p>
+                ) : (
+                  <div className="type-distribution-list">
+                    {Object.entries(stats.type_distribution).map(([type, count]) => (
+                      <div className="type-item" key={type}>
+                        <span className="type-badge">{type || "Unknown"}</span>
+                        <span className="type-count">{count} {count === 1 ? 'vehicle' : 'vehicles'}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          <div className="dashboard-grid-col-1">
+            {/* PAYMENTS OVERVIEW */}
+            <div className="dashboard-widget-panel payment-widget">
+              <h2>Billing & Payments</h2>
+              <div className="payment-cards-grid">
+                
+                <div className="payment-card pending-gradient">
+                  <span className="payment-icon">💳</span>
+                  <div className="payment-details">
+                    <h3>Pending Payments</h3>
+                    <p className="amount">
+                      {loading ? "$—" : `$${stats.payments?.pending_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </p>
+                    <span className="count-tag">{loading ? "—" : stats.payments?.pending_count} Pending Invoices</span>
+                  </div>
+                </div>
+
+                <div className="payment-card overdue-gradient">
+                  <span className="payment-icon">🚨</span>
+                  <div className="payment-details">
+                    <h3>Overdue Payments</h3>
+                    <p className="amount">
+                      {loading ? "$—" : `$${stats.payments?.overdue_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </p>
+                    <span className="count-tag danger-tag">{loading ? "—" : stats.payments?.overdue_count} Overdue Invoices</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ROW 3: EXPIRY ALERTS + UPCOMING DUTIES */}
+        <div className="dashboard-grid-row">
+
+          <div className="dashboard-grid-col-1">
+            {/* DOCUMENT EXPIRY ALERTS */}
+            <div className="dashboard-widget-panel scrollable-panel">
+              <h2>Document Expiry Alerts</h2>
+              {loading ? (
+                <p className="no-data-msg">Checking document status...</p>
+              ) : stats.document_expiry_alerts?.length === 0 ? (
+                <p className="no-data-msg text-success">✓ All vehicle certificates are valid!</p>
+              ) : (
+                <div className="alert-list">
+                  {stats.document_expiry_alerts.map((alert, idx) => (
+                    <div className={`alert-item-card ${alert.status === 'Expired' ? 'expired-border' : 'expiring-border'}`} key={idx}>
+                      <div className="alert-item-header">
+                        <span className="alert-vehicle">{alert.vehicle_number}</span>
+                        <span className={`status-badge-alert ${alert.status === 'Expired' ? 'expired-badge' : 'expiring-badge'}`}>
+                          {alert.status}
+                        </span>
+                      </div>
+                      <div className="alert-item-body">
+                        <p><strong>{alert.doc_type} Certificate</strong> expires on <strong>{alert.expiry_date}</strong></p>
+                        <span className={`time-left-tag ${alert.status === 'Expired' ? 'expired-text' : 'expiring-text'}`}>
+                          ⚠️ {alert.days_left < 0 ? `${Math.abs(alert.days_left)} days overdue` : `${alert.days_left} days remaining`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="dashboard-grid-col-1">
+            {/* UPCOMING DUTIES */}
+            <div className="dashboard-widget-panel scrollable-panel">
+              <h2>Upcoming Driver Duties</h2>
+              {loading ? (
+                <p className="no-data-msg">Loading upcoming duties...</p>
+              ) : stats.upcoming_duties?.length === 0 ? (
+                <p className="no-data-msg">No driver duties assigned. Assign vehicles to active drivers.</p>
+              ) : (
+                <div className="duty-list">
+                  {stats.upcoming_duties.map((duty, idx) => (
+                    <div className="duty-item-card" key={idx}>
+                      <div className="duty-avatar">
+                        {duty.driver_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="duty-info">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h4>{duty.driver_name}</h4>
+                          <span className={`status-badge ${duty.status === 'On Trip' ? 'booked' : duty.status === 'Ready' ? 'active' : 'maintenance'}`}>
+                            {duty.status}
+                          </span>
+                        </div>
+                        <p className="duty-vehicle">Vehicle: <strong>{duty.vehicle_number}</strong></p>
+                        <p className="duty-route">📍 {duty.route}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+
         {/* RECENT ACTIVITY TABLE */}
-        <div className="table-section">
+        <div className="table-section" style={{ marginTop: "28px" }}>
 
           <h2>Recent Vehicle Activity</h2>
 

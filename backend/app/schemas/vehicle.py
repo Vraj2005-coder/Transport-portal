@@ -20,6 +20,7 @@ class VehicleCreateRequest(BaseModel):
     insurance: Optional[str] = None     # Date string "YYYY-MM-DD"
     permit: Optional[str] = None
     fitness: Optional[str] = None
+    puc: Optional[str] = None
     status: str = "Active"              # "Active" | "Booked" | "Maintenance"
     location: Optional[str] = None
 
@@ -34,6 +35,7 @@ class VehicleUpdateRequest(BaseModel):
     insurance: Optional[str] = None
     permit: Optional[str] = None
     fitness: Optional[str] = None
+    puc: Optional[str] = None
     status: Optional[str] = None
     location: Optional[str] = None
 
@@ -53,6 +55,7 @@ class VehicleResponse(BaseModel):
     insurance: Optional[str] = None
     permit: Optional[str] = None
     fitness: Optional[str] = None
+    puc: Optional[str] = None
     status: str
     location: Optional[str] = None
 
@@ -61,12 +64,44 @@ class VehicleResponse(BaseModel):
 # Admin stats / activity schemas
 # ──────────────────────────────────────────────────────────────────────────────
 
+class DocumentExpiryAlert(BaseModel):
+    """Details of a vehicle document that is expired or expiring soon."""
+    vehicle_number: str
+    doc_type: str        # "Insurance", "Permit", "Fitness", "PUC"
+    expiry_date: str     # YYYY-MM-DD
+    days_left: int
+    status: str          # "Expired" | "Expiring Soon"
+
+
+class PaymentSummary(BaseModel):
+    """Pending and overdue payments overview."""
+    pending_amount: float
+    overdue_amount: float
+    pending_count: int
+    overdue_count: int
+
+
+class UpcomingDuty(BaseModel):
+    """A driver's scheduled/active duty route."""
+    driver_name: str
+    vehicle_number: str
+    route: str
+    status: str          # "On Trip" | "Ready" | "Suspended (Maintenance)"
+
+
 class AdminStatsResponse(BaseModel):
-    """Response for GET /api/admin/stats"""
+    """Response for GET /api/admin/stats with enriched dashboard metrics."""
     total_vehicles: int
     active_drivers: int
     trips_today: int
     pending_documents: int
+    available_vehicles: int
+    booked_vehicles: int
+    maintenance_vehicles: int
+    type_distribution: dict[str, int]
+    document_expiry_alerts: list[DocumentExpiryAlert]
+    payments: PaymentSummary
+    upcoming_duties: list[UpcomingDuty]
 
 
 class RecentActivityRow(BaseModel):

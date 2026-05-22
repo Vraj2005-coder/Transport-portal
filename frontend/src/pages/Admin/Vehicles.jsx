@@ -26,7 +26,7 @@ function Vehicles() {
 
   const [formData, setFormData] = useState({
     number: "", type: "", model: "", driver: "", driver_id: "",
-    insurance: "", permit: "", fitness: "", status: "",
+    insurance: "", permit: "", fitness: "", puc: "", status: "",
   });
 
   // ── Load vehicles and drivers on mount ──────────────────────────────────────
@@ -67,7 +67,7 @@ function Vehicles() {
       setSaving(true);
       const created = await vehiclesAPI.create(formData);
       setVehicles([...vehicles, created]);
-      setFormData({ number: "", type: "", model: "", driver: "", driver_id: "", insurance: "", permit: "", fitness: "", status: "" });
+      setFormData({ number: "", type: "", model: "", driver: "", driver_id: "", insurance: "", permit: "", fitness: "", puc: "", status: "" });
       setShowForm(false);
     } catch (err) {
       alert("Failed to add vehicle: " + err.message);
@@ -190,6 +190,11 @@ function Vehicles() {
                 <input className="v-input" type="date" name="fitness" value={formData.fitness} onChange={handleChange} />
               </label>
 
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>PUC Expiry Date</span>
+                <input className="v-input" type="date" name="puc" value={formData.puc} onChange={handleChange} />
+              </label>
+
               <select className="v-input" name="status" value={formData.status} onChange={handleChange}>
                 <option value="">Select Status *</option>
                 <option value="Active">Active</option>
@@ -241,7 +246,7 @@ function Vehicles() {
             <table>
               <thead>
                 <tr>
-                  {["Vehicle No.", "Type", "Model", "Driver", "Insurance", "Permit", "Fitness", "Status", "Actions"].map((h) => (
+                  {["Vehicle No.", "Type", "Model", "Driver", "Insurance", "Permit", "Fitness", "PUC", "Status", "Actions"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -256,6 +261,7 @@ function Vehicles() {
                     <td>{vehicle.insurance || "—"}</td>
                     <td>{vehicle.permit || "—"}</td>
                     <td>{vehicle.fitness || "—"}</td>
+                    <td>{vehicle.puc || "—"}</td>
                     <td>
                       <span className={`status-badge ${vehicle.status?.toLowerCase()}`}>
                         {vehicle.status}

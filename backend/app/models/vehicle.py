@@ -28,6 +28,7 @@ class VehicleInDB(BaseModel):
     insurance: Optional[str] = None         # Insurance expiry date string e.g. "2026-07-15"
     permit: Optional[str] = None            # Permit expiry date string
     fitness: Optional[str] = None           # Fitness cert expiry date string
+    puc: Optional[str] = None               # PUC expiry date string
     status: VehicleStatus = VehicleStatus.ACTIVE
     location: Optional[str] = None          # Current city / location
     created_at: datetime = Field(default_factory=datetime.utcnow)

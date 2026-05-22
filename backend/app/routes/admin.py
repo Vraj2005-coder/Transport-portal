@@ -27,16 +27,18 @@ router = APIRouter()
 )
 async def get_admin_stats(current_owner=Depends(require_owner)):
     """
-    Returns counts for the 4 dashboard cards in AdminDashboard.jsx:
-    - Total Vehicles
-    - Active Drivers
-    - Trips Today (placeholder — trips module not built yet)
-    - Pending Documents (vehicles with expiring docs in next 30 days)
+    Returns counts and lists for the dashboard widgets in AdminDashboard.jsx:
+    - Total Vehicles, Active Drivers, Trips Today, Pending Documents count
+    - Available, Booked, Maintenance vehicle counts
+    - Vehicle type distribution
+    - Document expiry alerts list (Insurance, Permit, Fitness, PUC)
+    - Payments summary (Pending, Overdue)
+    - Upcoming driver duties list
     """
     db = get_database()
 
-    # Vehicle counts
-    counts = await vehicle_service.get_vehicle_counts(current_owner.id, db)
+    # Get enriched stats from service
+    stats = await vehicle_service.get_enriched_dashboard_stats(current_owner.id, db)
 
     # Active drivers — users with role=driver, is_active=True, owner_id=current_owner
     active_drivers = await db.users.count_documents({
@@ -45,16 +47,18 @@ async def get_admin_stats(current_owner=Depends(require_owner)):
         "owner_id": current_owner.id,
     })
 
-    # Pending documents — vehicles with insurance/permit/fitness expiring in 30 days
-    pending_documents = await vehicle_service.get_expiring_documents_count(
-        current_owner.id, db, days=30
-    )
-
     return AdminStatsResponse(
-        total_vehicles=counts["total"],
+        total_vehicles=stats["total_vehicles"],
         active_drivers=active_drivers,
-        trips_today=0,          # Trips module to be built separately
-        pending_documents=pending_documents,
+        trips_today=stats["booked_vehicles"], # Dynamically match booked vehicles count
+        pending_documents=stats["pending_documents_count"],
+        available_vehicles=stats["available_vehicles"],
+        booked_vehicles=stats["booked_vehicles"],
+        maintenance_vehicles=stats["maintenance_vehicles"],
+        type_distribution=stats["type_distribution"],
+        document_expiry_alerts=stats["document_expiry_alerts"],
+        payments=stats["payments"],
+        upcoming_duties=stats["upcoming_duties"]
     )
 
 

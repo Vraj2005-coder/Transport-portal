@@ -13,8 +13,8 @@ import VehicleDetails from "./pages/Admin/VehicleDetails";
 /* DRIVER PAGES */
 
 import DriverLogin from "./pages/Driver/DriverLogin";
-import DriverRegister from "./pages/Driver/DriverRegister";
 import DriverDashboard from "./pages/Driver/DriverDashboard";
+import Drivers from "./pages/Admin/Drivers";
 
 import "./App.css";
 
@@ -70,8 +70,8 @@ function App() {
           />
 
           <Route
-            path="/driver-register"
-            element={<DriverRegister />}
+            path="/drivers"
+            element={<Drivers />}
           />
 
           <Route

@@ -183,16 +183,9 @@ function DriverLogin() {
           </form>
 
           <div className="register-link">
-
-            <p>
-              New Driver?{" "}
-
-              <Link to="/driver-register">
-                Register Here
-              </Link>
-
+            <p style={{ color: "#9ca3af", fontSize: "13px", textAlign: "center" }}>
+              Don't have an account? Contact your vendor admin — driver accounts are created by your company.
             </p>
-
           </div>
 
         </div>

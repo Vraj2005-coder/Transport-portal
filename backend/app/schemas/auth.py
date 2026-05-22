@@ -27,7 +27,7 @@ class OwnerRegisterRequest(BaseModel):
     @classmethod
     def email_deliverability(cls, v: str) -> str:
         try:
-            emailinfo = validate_email(v, check_deliverability=True)
+            emailinfo = validate_email(v, check_deliverability=False)
             return emailinfo.normalized
         except EmailNotValidError as e:
             raise ValueError(str(e))
@@ -76,7 +76,7 @@ class DriverCreateRequest(BaseModel):
     @classmethod
     def email_deliverability(cls, v: str) -> str:
         try:
-            emailinfo = validate_email(v, check_deliverability=True)
+            emailinfo = validate_email(v, check_deliverability=False)
             return emailinfo.normalized
         except EmailNotValidError as e:
             raise ValueError(str(e))
@@ -111,7 +111,7 @@ class LoginRequest(BaseModel):
     @classmethod
     def email_deliverability(cls, v: str) -> str:
         try:
-            emailinfo = validate_email(v, check_deliverability=True)
+            emailinfo = validate_email(v, check_deliverability=False)
             return emailinfo.normalized
         except EmailNotValidError as e:
             raise ValueError(str(e))

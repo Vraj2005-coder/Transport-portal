@@ -129,6 +129,25 @@ async def create_driver(
     return _to_profile(driver)
 
 
+@router.get(
+    "/drivers-list",
+    response_model=list[UserProfileResponse],
+    summary="List all drivers belonging to this owner",
+)
+async def list_drivers(current_owner=Depends(require_owner)):
+    """
+    Owner-only: returns all driver accounts created by the calling owner.
+    Used by the Admin Drivers management page.
+    """
+    db = get_database()
+    cursor = db.users.find({"role": "driver", "owner_id": current_owner.id})
+    drivers = []
+    async for doc in cursor:
+        from app.models.user import UserInDB
+        drivers.append(_to_profile(UserInDB.from_mongo(doc)))
+    return drivers
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Token management (authenticated)
 # ──────────────────────────────────────────────────────────────────────────────

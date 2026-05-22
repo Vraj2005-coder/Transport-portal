@@ -360,3 +360,19 @@ td{
   font-weight:700;
   letter-spacing:0.5px;
 }
+
+/* STATUS BADGES (shared across admin pages) */
+
+.status-badge{
+  padding:5px 13px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+  display:inline-block;
+}
+
+.status-badge.active      { background:#dcfce7; color:#16a34a; }
+.status-badge.booked      { background:#dbeafe; color:#2563eb; }
+.status-badge.maintenance { background:#fef3c7; color:#d97706; }
+.status-badge.completed   { background:#dcfce7; color:#16a34a; }
+.status-badge.on_trip     { background:#dbeafe; color:#2563eb; }

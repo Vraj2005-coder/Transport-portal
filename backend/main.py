@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import close_mongo_connection, connect_to_mongo
-from app.routes import auth
+from app.routes import auth, vehicles, admin, driver
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -71,6 +71,9 @@ app.add_middleware(
 # ──────────────────────────────────────────────────────────────────────────────
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+app.include_router(driver.router, prefix="/api/driver", tags=["Driver"])
 
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -33,7 +33,8 @@ function Sidebar({ sidebarOpen }) {
         {menuItems.map((item, index) => {
           const isActive =
             location.pathname === item.path ||
-            (item.path === "/vehicles" && location.pathname === "/vehicle-details");
+            (item.path === "/vehicles" && location.pathname === "/vehicle-details") ||
+            (item.path === "/trips" && location.pathname === "/trip-details");
 
           return (
             <li

@@ -9,6 +9,8 @@ import AdminRegister from "./pages/Admin/AdminRegister";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Vehicles from "./pages/Admin/Vehicles";
 import VehicleDetails from "./pages/Admin/VehicleDetails";
+import Trips from "./pages/Admin/Trips";
+import TripDetails from "./pages/Admin/TripDetails";
 
 /* DRIVER PAGES */
 
@@ -60,6 +62,16 @@ function App() {
           <Route
             path="/vehicle-details"
             element={<VehicleDetails />}
+          />
+
+          <Route
+            path="/trips"
+            element={<Trips />}
+          />
+
+          <Route
+            path="/trip-details"
+            element={<TripDetails />}
           />
 
           {/* DRIVER ROUTES */}

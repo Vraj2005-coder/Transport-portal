@@ -159,3 +159,14 @@ export const driverAPI = {
   stats:       () => apiFetch("/driver/stats"),
   currentTrip: () => apiFetch("/driver/current-trip"),
 };
+
+// ─── Trips ────────────────────────────────────────────────────────────────────
+
+export const tripsAPI = {
+  list:      ()         => apiFetch("/trips/"),
+  get:       (id)       => apiFetch(`/trips/${id}`),
+  create:    (body)     => apiFetch("/trips/", { method: "POST", body: JSON.stringify(body) }),
+  update:    (id, body) => apiFetch(`/trips/${id}`, { method: "PUT",  body: JSON.stringify(body) }),
+  cancel:    (id)       => apiFetch(`/trips/${id}`, { method: "DELETE" }),
+  deleteAll: ()         => apiFetch("/trips/all", { method: "DELETE" }),
+};

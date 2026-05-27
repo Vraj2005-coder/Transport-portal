@@ -78,11 +78,18 @@ function Trips() {
       setSaving(true);
       
       const payload = {
-        ...formData,
-        balance_amount: formData.balance_amount ? parseFloat(formData.balance_amount) : 0,
-        // Format to ISO if needed, datetime-local input value is usually YYYY-MM-DDTHH:mm
-        reporting_time: new Date(formData.reporting_time).toISOString(),
-      };
+  ...formData,
+
+  trip_id: `TRIP-${Date.now()}`,
+
+  balance_amount: formData.balance_amount
+    ? parseFloat(formData.balance_amount)
+    : 0,
+
+  reporting_time: new Date(
+    formData.reporting_time
+  ).toISOString(),
+};
 
       const created = await tripsAPI.create(payload);
       
@@ -261,6 +268,7 @@ function Trips() {
             <table>
               <thead>
                 <tr>
+                  <th>Trip ID</th>
                   <th>Client</th>
                   <th>Vehicle & Driver</th>
                   <th>Route</th>
@@ -271,7 +279,17 @@ function Trips() {
               </thead>
               <tbody>
                 {filteredTrips.map((trip, idx) => (
-                  <tr key={trip.id || idx}>
+                  <tr key={trip.id || idx}><td>
+  <div
+    style={{
+      fontWeight: "700",
+      color: "#2563eb",
+    }}
+  >
+    {trip.trip_id}
+  </div>
+</td>
+
                     <td>
                       <div style={{ fontWeight: "600", color: "#071739" }}>{trip.client_name}</div>
                       <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>{trip.client_phone}</div>

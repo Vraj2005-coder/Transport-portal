@@ -23,6 +23,11 @@ class VehicleCreateRequest(BaseModel):
     puc: Optional[str] = None
     status: str = "Active"              # "Active" | "Booked" | "Maintenance"
     location: Optional[str] = None
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 
 class VehicleUpdateRequest(BaseModel):
@@ -38,7 +43,11 @@ class VehicleUpdateRequest(BaseModel):
     puc: Optional[str] = None
     status: Optional[str] = None
     location: Optional[str] = None
-
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Response schemas
@@ -58,6 +67,11 @@ class VehicleResponse(BaseModel):
     puc: Optional[str] = None
     status: str
     location: Optional[str] = None
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 
 # ──────────────────────────────────────────────────────────────────────────────

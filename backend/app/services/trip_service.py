@@ -67,6 +67,7 @@ async def create_trip(
     # Build document
     doc = {
         "owner_id": owner_id,
+        "trip_id": data.trip_id,
         "vehicle_id": data.vehicle_id,
         "vehicle_number": vehicle.get("number", ""),
         "vehicle_type": vehicle.get("type", ""),

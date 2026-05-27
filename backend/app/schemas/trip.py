@@ -13,7 +13,8 @@ from pydantic import BaseModel
 
 class TripCreateRequest(BaseModel):
     """Body for POST /api/trips/ — owner creates a new trip/booking."""
-    vehicle_id: str                         # Which vehicle is being assigned
+    vehicle_id: str  
+    trip_id: str                       # Which vehicle is being assigned
     client_name: str
     client_phone: str                       # Used to send booking SMS
     pickup_location: str
@@ -43,6 +44,7 @@ class TripUpdateRequest(BaseModel):
 class TripResponse(BaseModel):
     """Safe trip representation returned to the client."""
     id: str
+    trip_id: str
     vehicle_id: str
     vehicle_number: str
     vehicle_type: str

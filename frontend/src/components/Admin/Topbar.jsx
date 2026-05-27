@@ -1,3 +1,5 @@
+import "../../styles/Admin/Topbar.css";
+
 function Topbar({
   sidebarOpen,
   setSidebarOpen,

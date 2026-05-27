@@ -13,6 +13,7 @@ function Sidebar({ sidebarOpen }) {
     { name: "Trips",     path: "/trips" },
     { name: "Documents", path: "/documents" },
     { name: "Settings",  path: "/settings" },
+    {name: "Payment & Balance", path: "/payments",}
   ];
 
   const handleLogout = () => {
@@ -34,7 +35,8 @@ function Sidebar({ sidebarOpen }) {
           const isActive =
             location.pathname === item.path ||
             (item.path === "/vehicles" && location.pathname === "/vehicle-details") ||
-            (item.path === "/trips" && location.pathname === "/trip-details");
+            (item.path === "/trips" && location.pathname === "/trip-details") ||
+            (item.path === "/payments" && location.pathname === "/payment-details");
 
           return (
             <li

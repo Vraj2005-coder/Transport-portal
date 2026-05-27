@@ -31,6 +31,11 @@ class VehicleInDB(BaseModel):
     puc: Optional[str] = None               # PUC expiry date string
     status: VehicleStatus = VehicleStatus.ACTIVE
     location: Optional[str] = None          # Current city / location
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

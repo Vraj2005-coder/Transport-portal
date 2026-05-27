@@ -11,6 +11,7 @@ import Vehicles from "./pages/Admin/Vehicles";
 import VehicleDetails from "./pages/Admin/VehicleDetails";
 import Trips from "./pages/Admin/Trips";
 import TripDetails from "./pages/Admin/TripDetails";
+import Payments from "./pages/Admin/Payments";
 
 /* DRIVER PAGES */
 
@@ -72,6 +73,10 @@ function App() {
           <Route
             path="/trip-details"
             element={<TripDetails />}
+          />
+          <Route
+            path="/payments"
+            element={<Payments />}
           />
 
           {/* DRIVER ROUTES */}

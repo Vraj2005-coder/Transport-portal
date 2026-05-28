@@ -49,7 +49,8 @@ class TripInDB(BaseModel):
     notes: Optional[str] = None
 
     # ── Payment ────────────────────────────────────────────────────────────────
-    balance_amount: float = 0.0
+    trip_cost: float = 0.0
+    amount_paid: float = 0.0
     payment_link: Optional[str] = None     # Dummy Razorpay link
     payment_status: PaymentStatus = PaymentStatus.PENDING
 

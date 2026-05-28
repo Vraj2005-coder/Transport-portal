@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import close_mongo_connection, connect_to_mongo
-from app.routes import auth, vehicles, admin, driver, trips
+from app.routes import auth, vehicles, admin, driver, trips, payments
 from app.services.scheduler_service import start_scheduler, stop_scheduler
 
 
@@ -78,6 +78,7 @@ app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
 app.include_router(trips.router, prefix="/api/trips", tags=["Trips"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(driver.router, prefix="/api/driver", tags=["Driver"])
+app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 
 
 # ──────────────────────────────────────────────────────────────────────────────

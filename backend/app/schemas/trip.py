@@ -1,5 +1,6 @@
 """
 Pydantic schemas for Trip request/response bodies.
+Aligned with actual MongoDB document structure.
 """
 from datetime import datetime
 from typing import Optional
@@ -13,14 +14,14 @@ from pydantic import BaseModel
 
 class TripCreateRequest(BaseModel):
     """Body for POST /api/trips/ — owner creates a new trip/booking."""
-    vehicle_id: str  
-    trip_id: str                       # Which vehicle is being assigned
+    vehicle_id: str
+    trip_id: str                           # Unique trip identifier
     client_name: str
-    client_phone: str                       # Used to send booking SMS
+    client_phone: str                      # Used to send booking notification
     pickup_location: str
     drop_location: str
     reporting_time: datetime               # ISO 8601 datetime e.g. "2026-05-26T08:00:00"
-    balance_amount: float = 0.0
+    balance_amount: float = 0.0            # Balance the client owes for this trip
     notes: Optional[str] = None
 
 
@@ -32,7 +33,7 @@ class TripUpdateRequest(BaseModel):
     drop_location: Optional[str] = None
     reporting_time: Optional[datetime] = None
     balance_amount: Optional[float] = None
-    payment_status: Optional[str] = None   # "Pending" | "Paid"
+    payment_status: Optional[str] = None   # "Pending" | "Partial" | "Paid"
     trip_status: Optional[str] = None      # "Scheduled" | "On Trip" | "Completed" | "Cancelled"
     notes: Optional[str] = None
 
@@ -42,7 +43,7 @@ class TripUpdateRequest(BaseModel):
 # ──────────────────────────────────────────────────────────────────────────────
 
 class TripResponse(BaseModel):
-    """Safe trip representation returned to the client."""
+    """Safe trip representation returned to the client — mirrors actual MongoDB fields."""
     id: str
     trip_id: str
     vehicle_id: str
@@ -56,7 +57,7 @@ class TripResponse(BaseModel):
     pickup_location: str
     drop_location: str
     reporting_time: datetime
-    balance_amount: float
+    balance_amount: float = 0.0
     payment_link: Optional[str] = None
     payment_status: str
     trip_status: str

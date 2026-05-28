@@ -1,1155 +1,413 @@
-import { useEffect, useMemo, useState } from "react";
-
+import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
-
+import { tripsAPI, requireAuth } from "../../api";
 import "../../styles/Admin/Payments.css";
 
 import {
-  FiSearch,
-  FiCalendar,
-  FiFilter,
-  FiEye,
-  FiDownload,
-  FiUpload,
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
   FiDollarSign,
   FiAlertTriangle,
-  FiCreditCard,
-  FiArrowRight,
+  FiDownload,
+  FiChevronDown,
+  FiChevronRight,
   FiX,
+  FiPlus,
 } from "react-icons/fi";
 
-const Payment = () => {
-  // =========================================
-  // SIDEBAR TOGGLE WORKING
-  // =========================================
+const Payments = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+  // Data State
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // =========================================
-  // REAL DATABASE DATA
-  // =========================================
-  // KEEP EMPTY
-  // FETCH FROM API / DATABASE
- const [trips, setTrips] = useState([]);
-  const [payments, setPayments] = useState(
-    []
-  );
-
-  // =========================================
-  // FILTER STATES
-  // =========================================
-
+  // Filters
   const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("All Status");
 
-  const [selectedStatus, setSelectedStatus] =
-    useState("All Status");
+  // Expand/Collapse Client Rows
+  const [expandedClients, setExpandedClients] = useState({});
 
-  const [selectedClient, setSelectedClient] =
-    useState("All Clients");
+  // "Log Payment" modal state
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payTrip, setPayTrip] = useState(null);       // trip object selected
+  const [amountReceived, setAmountReceived] = useState("");
+  const [payMethod, setPayMethod] = useState("Cash");
+  const [saving, setSaving] = useState(false);
 
-  const [selectedMethod, setSelectedMethod] =
-    useState("All Payment Methods");
-
-  // =========================================
-  // DATE FILTER
-  // =========================================
   useEffect(() => {
+    requireAuth();
+    fetchData();
+  }, []);
 
-  const fetchTrips = async () => {
-
+  async function fetchData() {
     try {
-
-      const response = await fetch(
-  "http://localhost:8000/api/trips/",
-  {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }
-  
-);
-      const data = await response.json();
-
-      setTrips(Array.isArray(data) ? data : []);
-
-    } catch (error) {
-
-      console.log(error);
-
+      setLoading(true);
+      setError("");
+      const tripsData = await tripsAPI.list();
+      setTrips(tripsData);
+    } catch (err) {
+      setError("Failed to load trips: " + err.message);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  const toggleClient = (clientKey) => {
+    setExpandedClients((prev) => ({
+      ...prev,
+      [clientKey]: !prev[clientKey],
+    }));
   };
 
-  fetchTrips();
+  // Group Trips by Client using actual DB field: balance_amount
+  const clientGroups = useMemo(() => {
+    const groups = {};
+    trips.forEach((trip) => {
+      const clientKey = `${trip.client_name}__${trip.client_phone}`;
 
-}, []);
-  const [fromDate, setFromDate] = useState(
-    ""
-  );
-
-  const [toDate, setToDate] = useState("");
-
-  // =========================================
-  // ADD PAYMENT MODAL
-  // =========================================
-
-  const [showAddForm, setShowAddForm] =
-    useState(false);
-  const [isEdit, setIsEdit] =
-  useState(false);
-  const [editIndex, setEditIndex] =
-  useState(null);
-  // =========================================
-  // NEW PAYMENT
-  // =========================================
-
-  const [newPayment, setNewPayment] =
-    useState({
-      id: "",
-      client: "",
-      vehicle: "",
-      completedDate: "",
-      tripAmount: "",
-      paidAmount: "",
-      transactionId: "",
-      method: "UPI",
-    });
-
-  // =========================================
-  // FILTER LOGIC
-  // =========================================
-
-  const filteredPayments = useMemo(() => {
-    return payments.filter((item) => {
       const matchesSearch =
-        item.id
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.client
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.vehicle
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        item.transactionId
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+        trip.client_name?.toLowerCase().includes(search.toLowerCase()) ||
+        trip.client_phone?.toLowerCase().includes(search.toLowerCase()) ||
+        trip.trip_id?.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus =
         selectedStatus === "All Status"
           ? true
-          : item.status === selectedStatus;
+          : trip.payment_status === selectedStatus;
 
-      const matchesClient =
-        selectedClient === "All Clients"
-          ? true
-          : item.client === selectedClient;
-
-      const matchesMethod =
-        selectedMethod ===
-        "All Payment Methods"
-          ? true
-          : item.method === selectedMethod;
-
-      let matchesDate = true;
-
-      if (fromDate && toDate) {
-        const itemDate = new Date(
-          item.completedDate
-        );
-
-        matchesDate =
-          itemDate >= new Date(fromDate) &&
-          itemDate <= new Date(toDate);
+      if (matchesSearch && matchesStatus) {
+        if (!groups[clientKey]) {
+          groups[clientKey] = {
+            client_name: trip.client_name,
+            client_phone: trip.client_phone,
+            total_balance: 0,
+            trips: [],
+          };
+        }
+        groups[clientKey].trips.push(trip);
+        groups[clientKey].total_balance += trip.balance_amount || 0;
       }
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesClient &&
-        matchesMethod &&
-        matchesDate
-      );
     });
-  }, [
-    payments,
-    search,
-    selectedStatus,
-    selectedClient,
-    selectedMethod,
-    fromDate,
-    toDate,
-  ]);
+    return groups;
+  }, [trips, search, selectedStatus]);
 
-  // =========================================
-  // KPI CALCULATIONS
-  // =========================================
+  // KPI Totals — all based on balance_amount (single financial field in DB)
+  const totalBalance = trips.reduce((s, t) => s + (t.balance_amount || 0), 0);
+  const tripsWithBalance = trips.filter((t) => (t.balance_amount || 0) > 0).length;
+  const tripsSettled = trips.filter(
+    (t) => t.payment_status === "Paid" || (t.balance_amount || 0) === 0
+  ).length;
 
-  const totalTrips =
-    filteredPayments.length;
+  // Open modal pre-filled with the selected trip
+  const openPayModal = (e, trip) => {
+    e.stopPropagation();
+    setPayTrip(trip);
+    setAmountReceived("");
+    setPayMethod("Cash");
+    setShowPayModal(true);
+  };
 
-  const totalTripAmount =
-    filteredPayments.reduce(
-      (acc, item) =>
-        acc + Number(item.tripAmount || 0),
-      0
-    );
-
-  const totalReceived =
-    filteredPayments.reduce(
-      (acc, item) =>
-        acc + Number(item.paidAmount || 0),
-      0
-    );
-
-  const totalOutstanding =
-    filteredPayments.reduce(
-      (acc, item) =>
-        acc + Number(item.balance || 0),
-      0
-    );
-
-  const overdueTrips =
-    filteredPayments.filter(
-      (item) => item.status === "Overdue"
-    ).length;
-
-  // =========================================
-  // ADD PAYMENT
-  // =========================================
-
-  const handleAddPayment = (e) => {
+  // Reduce balance_amount on the trip when payment is logged
+  const handleLogPayment = async (e) => {
     e.preventDefault();
+    const amount = parseFloat(amountReceived);
+    if (!amount || amount <= 0) return alert("Please enter a valid amount.");
 
-    const tripAmount = Number(
-      newPayment.tripAmount
-    );
+    try {
+      setSaving(true);
+      const newBalance = Math.max(0, (payTrip.balance_amount || 0) - amount);
+      const newStatus = newBalance === 0 ? "Paid" : "Partial";
 
-    const paidAmount = Number(
-      newPayment.paidAmount
-    );
+      await tripsAPI.update(payTrip.id, {
+        balance_amount: newBalance,
+        payment_status: newStatus,
+      });
 
-    const balance =
-      tripAmount - paidAmount;
-
-    let status = "Paid";
-
-    if (paidAmount === 0) {
-      status = "Overdue";
-    } else if (balance > 0) {
-      status = "Partial";
+      alert(`Payment of ₹${amount.toLocaleString()} logged! New balance: ₹${newBalance.toLocaleString()}`);
+      setShowPayModal(false);
+      fetchData();
+    } catch (err) {
+      alert("Failed to log payment: " + err.message);
+    } finally {
+      setSaving(false);
     }
-
-    const paymentData = {
-      ...newPayment,
-      tripAmount,
-      paidAmount,
-      balance,
-      status,
-    };
-
-    // =====================================
-    // API POST HERE
-    // =====================================
-
-    if (isEdit) {
-
-  const updatedPayments = [
-    ...payments,
-  ];
-
-  updatedPayments[
-    editIndex
-  ] = paymentData;
-
-  setPayments(
-    updatedPayments
-  );
-
-  setIsEdit(false);
-
-  setEditIndex(null);
-
-} else {
-
-  setPayments((prev) => [
-    paymentData,
-    ...prev,
-  ]);
-}
-
-    setNewPayment({
-      id: "",
-      client: "",
-      vehicle: "",
-      completedDate: "",
-      tripAmount: "",
-      paidAmount: "",
-      transactionId: "",
-      method: "UPI",
-    });
-
-    setShowAddForm(false);
-  };
-
-  /* =========================================
-   EDIT PAYMENT
-========================================= */
-
-const handleEdit = (index) => {
-
-  const payment =
-    filteredPayments[index];
-
-  setNewPayment(payment);
-
-  setEditIndex(index);
-
-  setIsEdit(true);
-
-  setShowAddForm(true);
-};
-
-  // =========================================
-  // DELETE PAYMENT
-  // =========================================
-
- const handleDelete = (id) => {
-
-  const confirmDelete =
-    window.confirm(
-      "Are you sure you want to delete this payment?"
-    );
-
-  if (!confirmDelete) return;
-
-  const updated = payments.filter(
-    (item) => item.id !== id
-  );
-
-  setPayments(updated);
-
-  // API DELETE HERE
-};
-
-  // =========================================
-  // DOWNLOAD REPORT
-  // =========================================
-
-  const handleDownloadReport = () => {
-    const data = JSON.stringify(
-      filteredPayments,
-      null,
-      2
-    );
-
-    const blob = new Blob([data], {
-      type: "application/json",
-    });
-
-    const url =
-      window.URL.createObjectURL(blob);
-
-    const link =
-      document.createElement("a");
-
-    link.href = url;
-
-    link.download = "payments.json";
-
-    link.click();
-  };
-
-  // =========================================
-  // FILE UPLOAD
-  // =========================================
-
-  const handleUploadProof = (e, id) => {
-    const file = e.target.files[0];
-
-    if (!file) return;
-
-    const updated = payments.map((item) => {
-      if (item.id === id) {
-        return {
-          ...item,
-          proof: file.name,
-        };
-      }
-
-      return item;
-    });
-
-    setPayments(updated);
-
-    // API FILE UPLOAD HERE
   };
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
+      <Sidebar sidebarOpen={sidebarOpen} />
+      <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : "sidebar-close"}`}>
+        <Topbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-      />
-
-      {/* MAIN */}
-
-      <div
-        className={`dashboard-content ${
-          sidebarOpen
-            ? "sidebar-open"
-            : "sidebar-close"
-        }`}
-      >
-        {/* TOPBAR */}
-
-        <Topbar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={
-            setSidebarOpen
-          }
-        />
-
-        {/* ================================= */}
-        {/* PAGE HEADER */}
-        {/* ================================= */}
-
+        {/* ── Page Header ── */}
         <div className="payments-header-row">
           <div>
-            <h2 className="payments-page-title">
-              Payment & Balance
-              Management
-            </h2>
-
+            <h2 className="payments-page-title">Client Ledger & Payments</h2>
             <div className="payments-breadcrumb">
-              Dashboard
-              <span>›</span>
-              Payments
+              Dashboard <span>›</span> Payments
             </div>
-          </div>
-
-          <div className="payments-top-actions">
-            {/* SEARCH */}
-
-            <div className="payments-search-box">
-              <FiSearch />
-
-              <input
-                type="text"
-                placeholder="Search by trip ID, client, vehicle, transaction ID..."
-                value={search}
-                onChange={(e) =>
-                  setSearch(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            {/* DATE */}
-
-            <div className="payments-date-box">
-              <div className="date-item">
-                <FiCalendar />
-
-                <div>
-                  <label>From</label>
-
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={(e) =>
-                      setFromDate(
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="date-divider">
-                -
-              </div>
-
-              <div className="date-item">
-                <FiCalendar />
-
-                <div>
-                  <label>To</label>
-
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={(e) =>
-                      setToDate(
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* BUTTON */}
-
-            <button
-              className="add-payment-btn"
-              onClick={() =>
-                setShowAddForm(true)
-              }
-            >
-              <FiPlus />
-              Add Payment
-            </button>
           </div>
         </div>
 
-        {/* ================================= */}
-        {/* ADD PAYMENT MODAL */}
-        {/* ================================= */}
-
-        {showAddForm && (
-          <div className="payment-modal-overlay">
-            <div className="payment-modal">
-              <div className="payment-modal-top">
-                <h3>Add Payment</h3>
-
-                <button
-                  onClick={() =>
-                    setShowAddForm(false)
-                  }
-                >
-                  <FiX />
-                </button>
-              </div>
-
-              <form
-                onSubmit={
-                  handleAddPayment
-                }
-              >
-                <div className="payment-form-grid">
-                  <select
-  required
-  value={newPayment.id}
-  onChange={(e) => {
-    const selectedTrip = trips.find(
-      (trip) => trip.trip_id  === e.target.value
-    );
-
-    setNewPayment({
-      ...newPayment,
-      id: selectedTrip?.trip_id || "",
-      client: selectedTrip?.client_name  || "",
-      vehicle: selectedTrip?.vehicle_number  || "",
-      tripAmount:
-        selectedTrip?.balance_amount  || "",
-    });
-  }}
->
-  <option value="">
-    Select Trip ID
-  </option>
-
-  {trips.map((trip) => (
-  <option
-    key={trip.trip_id}
-    value={trip.trip_id}
-  >
-    {trip.trip_id}
-  </option>
-))}
-</select>
-
-                  <input
-                    type="text"
-                    placeholder="Client Name"
-                    required
-                    value={
-                      newPayment.client
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        client:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Vehicle Number"
-                    required
-                    value={
-                      newPayment.vehicle
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        vehicle:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    type="date"
-                    required
-                    value={
-                      newPayment.completedDate
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        completedDate:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Trip Amount"
-                    required
-                    value={
-                      newPayment.tripAmount
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        tripAmount:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Paid Amount"
-                    required
-                    value={
-                      newPayment.paidAmount
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        paidAmount:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Transaction ID"
-                    value={
-                      newPayment.transactionId
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        transactionId:
-                          e.target.value,
-                      })
-                    }
-                  />
-
-                  <select
-                    value={
-                      newPayment.method
-                    }
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        method:
-                          e.target.value,
-                      })
-                    }
-                  >
-                    <option>UPI</option>
-
-                    <option>
-                      Bank Transfer
-                    </option>
-
-                    <option>NEFT</option>
-
-                    <option>Cash</option>
-                  </select>
-                </div>
-                  
-                  {/* FILE UPLOAD */}
-
-<div className="payment-upload-field">
-
-  <label className="payment-upload-title">
-    Upload Payment Proof
-  </label>
-
-  <input
-    type="file"
-    className="payment-file-input"
-    accept="image/*,.pdf"
-    onChange={(e) =>
-      setNewPayment({
-        ...newPayment,
-        paymentProof:
-          e.target.files[0],
-      })
-    }
-  />
-
-  {newPayment.paymentProof && (
-    <div className="uploaded-file-box">
-      {newPayment.paymentProof.name}
-    </div>
-  )}
-</div>
-                <button
-                  type="submit"
-                  className="save-payment-btn"
-                >
-                  Save Payment
-                </button>
-              </form>
-            </div>
+        {error && (
+          <div style={{ margin: "0 32px 16px", color: "#ef4444", fontWeight: 600 }}>
+            ⚠ {error}
           </div>
         )}
 
-        {/* ================================= */}
-        {/* KPI CARDS */}
-        {/* ================================= */}
-
+        {/* ── KPI Cards ── */}
         <div className="payment-kpi-grid">
-          
-
           <div className="payment-kpi-card orange-card">
             <div className="payment-kpi-content">
               <div>
-                <p className="payment-kpi-label">
-                  Total Trip Amount
-                </p>
-
-                <h3>
-                  ₹
-                  {totalTripAmount.toLocaleString()}
-                </h3>
+                <p className="payment-kpi-label">Total Outstanding</p>
+                <h3>₹{totalBalance.toLocaleString()}</h3>
               </div>
-
               <div className="payment-kpi-icon orange-icon">
                 <FiDollarSign />
               </div>
             </div>
           </div>
-
           <div className="payment-kpi-card red-card">
             <div className="payment-kpi-content">
               <div>
-                <p className="payment-kpi-label">
-                  Total Received
-                </p>
-
-                <h3>
-                  ₹
-                  {totalReceived.toLocaleString()}
-                </h3>
+                <p className="payment-kpi-label">Trips with Balance</p>
+                <h3>{tripsWithBalance}</h3>
               </div>
-
               <div className="payment-kpi-icon red-icon">
-                <FiDownload />
-              </div>
-            </div>
-          </div>
-
-          <div className="payment-kpi-card green-card">
-            <div className="payment-kpi-content">
-              <div>
-                <p className="payment-kpi-label">
-                  Total Outstanding
-                </p>
-
-                <h3>
-                  ₹
-                  {totalOutstanding.toLocaleString()}
-                </h3>
-              </div>
-
-              <div className="payment-kpi-icon green-icon">
-                <FiDollarSign />
-              </div>
-            </div>
-          </div>
-
-          <div className="payment-kpi-card purple-card">
-            <div className="payment-kpi-content">
-              <div>
-                <p className="payment-kpi-label">
-                  Overdue Trips
-                </p>
-
-                <h3>{overdueTrips}</h3>
-              </div>
-
-              <div className="payment-kpi-icon purple-icon">
                 <FiAlertTriangle />
               </div>
             </div>
           </div>
-        </div>
-
-        {/* ================================= */}
-        {/* TABLE */}
-        {/* ================================= */}
-
-        <div className="payments-table-wrapper">
-          <div className="payments-table-top">
-            <h3>Trips & Payments</h3>
-
-            <div className="payments-table-actions">
-              {/* STATUS */}
-
-              <select
-                value={
-                  selectedStatus
-                }
-                onChange={(e) =>
-                  setSelectedStatus(
-                    e.target.value
-                  )
-                }
-              >
-                <option>
-                  All Status
-                </option>
-
-                <option>Paid</option>
-
-                <option>Partial</option>
-
-                <option>Overdue</option>
-              </select>
-
-              {/* CLIENT */}
-
-              <select
-                value={
-                  selectedClient
-                }
-                onChange={(e) =>
-                  setSelectedClient(
-                    e.target.value
-                  )
-                }
-              >
-                <option>
-                  All Clients
-                </option>
-
-                {[
-                  ...new Set(
-                    payments.map(
-                      (item) =>
-                        item.client
-                    )
-                  ),
-                ].map((client) => (
-                  <option
-                    key={client}
-                  >
-                    {client}
-                  </option>
-                ))}
-              </select>
-
-              {/* METHOD */}
-
-              <select
-                value={
-                  selectedMethod
-                }
-                onChange={(e) =>
-                  setSelectedMethod(
-                    e.target.value
-                  )
-                }
-              >
-                <option>
-                  All Payment Methods
-                </option>
-
-                <option>UPI</option>
-
-                <option>
-                  Bank Transfer
-                </option>
-
-                <option>NEFT</option>
-
-                <option>Cash</option>
-              </select>
-
-              <button className="filter-btn">
-                <FiFilter />
-                Filter
-              </button>
+          <div className="payment-kpi-card green-card">
+            <div className="payment-kpi-content">
+              <div>
+                <p className="payment-kpi-label">Trips Settled</p>
+                <h3>{tripsSettled}</h3>
+              </div>
+              <div className="payment-kpi-icon green-icon">
+                <FiDownload />
+              </div>
             </div>
           </div>
+          <div className="payment-kpi-card purple-card">
+            <div className="payment-kpi-content">
+              <div>
+                <p className="payment-kpi-label">Total Trips</p>
+                <h3>{trips.length}</h3>
+              </div>
+              <div className="payment-kpi-icon purple-icon">
+                <FiDollarSign />
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* TABLE */}
+        {/* ── Filter Bar ── */}
+        <div style={{ display: "flex", gap: "15px", padding: "0 32px 20px" }}>
+          <input
+            className="t-input"
+            placeholder="Search by client name, phone, or trip ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <select
+            className="t-input"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            style={{ width: "200px" }}
+          >
+            <option value="All Status">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Partial">Partial</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
 
-          <div className="payments-table-scroll">
-            <table className="payments-table">
-              <thead>
+        {/* ── Client Ledger Table ── */}
+        <div
+          className="payments-table-panel"
+          style={{ margin: "0 32px 40px", background: "white", borderRadius: "14px", border: "1px solid #e2e8f0", overflow: "hidden" }}
+        >
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#f1f5f9", textAlign: "left", fontSize: "12px", color: "#475569", textTransform: "uppercase" }}>
+                <th style={{ padding: "14px 20px" }}>Client</th>
+                <th style={{ padding: "14px 20px" }}>Trips</th>
+                <th style={{ padding: "14px 20px" }}>Total Balance Due</th>
+                <th style={{ padding: "14px 20px" }}>Status</th>
+                <th style={{ padding: "14px 20px" }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th>Trip ID</th>
-
-                  <th>Client</th>
-
-                  <th>Vehicle</th>
-
-                  <th>Date</th>
-
-                  <th>Trip Amount</th>
-
-                  <th>Paid Amount</th>
-
-                  <th>Balance</th>
-
-                  <th>Transaction ID</th>
-
-                  <th>Method</th>
-
-                  <th>Status</th>
-
-                  <th>Actions</th>
+                  <td colSpan="5" style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>
+                    Loading trips...
+                  </td>
                 </tr>
-              </thead>
+              ) : Object.keys(clientGroups).length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>
+                    No payment records found.
+                  </td>
+                </tr>
+              ) : (
+                Object.entries(clientGroups).map(([clientKey, group]) => {
+                  const isExpanded = expandedClients[clientKey];
 
-              <tbody>
-                {filteredPayments.length >
-                0 ? (
-                  filteredPayments.map(
-                    (item, index) => (
+                  return (
+                    <React.Fragment key={clientKey}>
+                      {/* Client Header Row */}
                       <tr
-                        key={item.id}
+                        style={{ cursor: "pointer", background: isExpanded ? "#f8fafc" : "white", borderBottom: "1px solid #f1f5f9" }}
+                        onClick={() => toggleClient(clientKey)}
                       >
-                        <td className="trip-link">
-                          {item.id}
-                        </td>
-
-                        <td>
-                          {
-                            item.client
-                          }
-                        </td>
-
-                        <td>
-                          {
-                            item.vehicle
-                          }
-                        </td>
-
-                        <td>
-                          {
-                            item.completedDate
-                          }
-                        </td>
-
-                        <td>
-                          ₹
-                          {Number(
-                            item.tripAmount
-                          ).toLocaleString()}
-                        </td>
-
-                        <td>
-                          ₹
-                          {Number(
-                            item.paidAmount
-                          ).toLocaleString()}
-                        </td>
-
-                        <td>
-                          ₹
-                          {Number(
-                            item.balance
-                          ).toLocaleString()}
-                        </td>
-
-                        <td>
-                          {
-                            item.transactionId
-                          }
-                        </td>
-
-                        <td>
-                          {item.method}
-                        </td>
-
-                        <td>
-                          <span
-                            className={`payment-status ${item.status?.toLowerCase()}`}
-                          >
-                            {
-                              item.status
-                            }
+                        <td style={{ padding: "16px 20px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "10px" }}>
+                          <span style={{ color: "#64748b" }}>
+                            {isExpanded ? <FiChevronDown /> : <FiChevronRight />}
                           </span>
-                        </td>
-
-                        {/* ACTIONS */}
-
-                        <td>
-                          <div className="payment-action-buttons">
-                            <button>
-                              <FiEye />
-                            </button>
-
-                            <button
-                              onClick={() =>
-                             handleEdit(index)
-                            }
-                            >
-                              <FiEdit2 />
-                          </button>
-
-                            <label className="upload-btn">
-                              <FiUpload />
-
-                              <input
-                                type="file"
-                                hidden
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleUploadProof(
-                                    e,
-                                    item.id
-                                  )
-                                }
-                              />
-                            </label>
-
-                            <button
-                              onClick={
-                                handleDownloadReport
-                              }
-                            >
-                              <FiDownload />
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                handleDelete(
-                                  item.id
-                                )
-                              }
-                            >
-                              <FiTrash2 />
-                            </button>
+                          <div>
+                            <div>{group.client_name}</div>
+                            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>
+                              {group.client_phone}
+                            </div>
                           </div>
                         </td>
+                        <td style={{ padding: "16px 20px" }}>{group.trips.length}</td>
+                        <td style={{ padding: "16px 20px", fontWeight: "bold", color: group.total_balance > 0 ? "#ef4444" : "#10b981" }}>
+                          ₹{group.total_balance.toLocaleString()}
+                        </td>
+                        <td style={{ padding: "16px 20px" }}>
+                          <span className={`status-badge ${group.total_balance <= 0 ? "active" : "maintenance"}`}>
+                            {group.total_balance <= 0 ? "Settled" : "Due"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "16px 20px" }}>—</td>
                       </tr>
-                    )
-                  )
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="11"
-                      className="no-payment-data"
-                    >
-                      No Payment Records
-                      Found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+
+                      {/* Expanded: individual trip rows */}
+                      {isExpanded &&
+                        group.trips.map((trip) => (
+                          <tr
+                            key={trip.id}
+                            style={{ background: "#fafafa", borderBottom: "1px solid #f1f5f9" }}
+                          >
+                            <td style={{ padding: "12px 20px 12px 54px" }}>
+                              <div style={{ fontWeight: "600", color: "#2563eb" }}>{trip.trip_id}</div>
+                              <div style={{ fontSize: "11px", color: "#64748b" }}>
+                                {trip.vehicle_number} · {new Date(trip.reporting_time).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 20px", fontSize: "13px", color: "#475569" }}>
+                              {trip.pickup_location} → {trip.drop_location}
+                            </td>
+                            <td style={{ padding: "12px 20px", fontWeight: "600", color: (trip.balance_amount || 0) > 0 ? "#ef4444" : "#10b981" }}>
+                              ₹{(trip.balance_amount || 0).toLocaleString()}
+                            </td>
+                            <td style={{ padding: "12px 20px" }}>
+                              <span className={`status-badge ${trip.payment_status === "Paid" ? "active" : trip.payment_status === "Partial" ? "booked" : "maintenance"}`}>
+                                {trip.payment_status || "Pending"}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 20px" }}>
+                              {(trip.balance_amount || 0) > 0 && (
+                                <button
+                                  className="btn-primary btn-sm"
+                                  onClick={(e) => openPayModal(e, trip)}
+                                >
+                                  <FiPlus style={{ marginRight: 4 }} /> Log Payment
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* ================================= */}
-        {/* BOTTOM CARDS */}
-        {/* ================================= */}
+        {/* ── Log Payment Modal ── */}
+        {showPayModal && payTrip && (
+          <div className="payment-modal-overlay">
+            <div className="payment-modal" style={{ maxWidth: "460px" }}>
+              <div className="payment-modal-top">
+                <h3>Log Payment</h3>
+                <button onClick={() => setShowPayModal(false)}>
+                  <FiX />
+                </button>
+              </div>
 
-        {/* <div className="payment-bottom-grid">
-          <div
-            className="payment-bottom-card green-soft"
-            onClick={() =>
-              setShowAddForm(true)
-            }
-          >
-            <div className="payment-bottom-icon green-light">
-              <FiPlus />
+              <div style={{ padding: "10px 0 20px", color: "#475569", fontSize: "14px" }}>
+                <strong>Trip:</strong> {payTrip.trip_id} — {payTrip.client_name}<br />
+                <strong>Current Balance:</strong>{" "}
+                <span style={{ color: "#ef4444", fontWeight: 700 }}>
+                  ₹{(payTrip.balance_amount || 0).toLocaleString()}
+                </span>
+              </div>
+
+              <form onSubmit={handleLogPayment} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <label className="trips-label">
+                  <span>Amount Received Now (₹) *</span>
+                  <input
+                    type="number"
+                    className="t-input"
+                    required
+                    min="1"
+                    max={payTrip.balance_amount || 999999}
+                    value={amountReceived}
+                    onChange={(e) => setAmountReceived(e.target.value)}
+                    placeholder={`Max: ₹${(payTrip.balance_amount || 0).toLocaleString()}`}
+                  />
+                </label>
+
+                <label className="trips-label">
+                  <span>Payment Method</span>
+                  <select
+                    className="t-input"
+                    value={payMethod}
+                    onChange={(e) => setPayMethod(e.target.value)}
+                  >
+                    <option>Cash</option>
+                    <option>UPI</option>
+                    <option>Bank Transfer</option>
+                    <option>Cheque</option>
+                  </select>
+                </label>
+
+                {amountReceived && (
+                  <div style={{ padding: "12px 16px", background: "#f0fdf4", borderRadius: "8px", fontSize: "13px", color: "#166534" }}>
+                    New balance after payment:{" "}
+                    <strong>
+                      ₹{Math.max(0, (payTrip.balance_amount || 0) - parseFloat(amountReceived || 0)).toLocaleString()}
+                    </strong>
+                    {parseFloat(amountReceived) >= (payTrip.balance_amount || 0) && (
+                      <span style={{ marginLeft: 8, background: "#dcfce7", borderRadius: 4, padding: "2px 6px" }}>✓ Fully Settled</span>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="save-payment-btn"
+                  style={{ width: "100%" }}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save Payment"}
+                </button>
+              </form>
             </div>
-
-            <div className="payment-bottom-content">
-              <h4>Add Payment</h4>
-
-              <p>
-                Add new payment record
-              </p>
-            </div>
-
-            <button>
-              <FiArrowRight />
-            </button>
           </div>
-
-          <div className="payment-bottom-card orange-soft">
-            <div className="payment-bottom-icon orange-light">
-              <FiUpload />
-            </div>
-
-            <div className="payment-bottom-content">
-              <h4>
-                Upload Payment Proof
-              </h4>
-
-              <p>
-                Upload receipts &
-                screenshots
-              </p>
-            </div>
-
-            <button>
-              <FiArrowRight />
-            </button>
-          </div>
-
-          <div
-            className="payment-bottom-card sky-soft"
-            onClick={
-              handleDownloadReport
-            }
-          >
-            <div className="payment-bottom-icon sky-light">
-              <FiDownload />
-            </div>
-
-            <div className="payment-bottom-content">
-              <h4>Download Report</h4>
-
-              <p>
-                Export payment records
-              </p>
-            </div>
-
-            <button>
-              <FiArrowRight />
-            </button>
-          </div>
-        </div> */}
-
-
+        )}
       </div>
     </div>
   );
 };
 
-export default Payment;
+export default Payments;

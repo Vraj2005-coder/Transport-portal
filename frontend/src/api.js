@@ -170,3 +170,11 @@ export const tripsAPI = {
   cancel:    (id)       => apiFetch(`/trips/${id}`, { method: "DELETE" }),
   deleteAll: ()         => apiFetch("/trips/all", { method: "DELETE" }),
 };
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+export const paymentsAPI = {
+  list:   ()       => apiFetch("/payments/"),
+  create: (body)   => apiFetch("/payments/", { method: "POST", body: JSON.stringify(body) }),
+  delete: (id)     => apiFetch(`/payments/${id}`, { method: "DELETE" }),
+};

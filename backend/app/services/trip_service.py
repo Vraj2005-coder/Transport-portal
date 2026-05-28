@@ -94,12 +94,9 @@ async def create_trip(
     doc["_id"] = result.inserted_id
     doc["id"] = trip_id
 
-    # Generate Payment Link
-    payment_link = None
-    if data.balance_amount > 0:
-        payment_link = create_payment_link(trip_id, data.balance_amount, data.client_name)
-        await db.trips.update_one({"_id": doc["_id"]}, {"$set": {"payment_link": payment_link}})
-        doc["payment_link"] = payment_link
+    # Generate payment link (fire-and-forget)
+    payment_link = create_payment_link(doc["balance_amount"], doc["client_name"])
+    doc["payment_link"] = payment_link
 
     # Send Messages (Fire & Forget)
     driver_sent = send_driver_trip_message(
@@ -114,13 +111,17 @@ async def create_trip(
         payment_link=payment_link
     )
     
-    if driver_sent or client_sent:
-        await db.trips.update_one(
-            {"_id": doc["_id"]},
-            {"$set": {"driver_msg_sent": driver_sent, "client_msg_sent": client_sent}}
-        )
-        doc["driver_msg_sent"] = driver_sent
-        doc["client_msg_sent"] = client_sent
+    # Save payment_link + msg flags to DB in one update
+    await db.trips.update_one(
+        {"_id": doc["_id"]},
+        {"$set": {
+            "payment_link": payment_link,
+            "driver_msg_sent": driver_sent,
+            "client_msg_sent": client_sent,
+        }}
+    )
+    doc["driver_msg_sent"] = driver_sent
+    doc["client_msg_sent"] = client_sent
 
     # Update Vehicle Status
     await db.vehicles.update_one({"_id": vehicle["_id"]}, {"$set": {"status": "Booked", "updated_at": now}})

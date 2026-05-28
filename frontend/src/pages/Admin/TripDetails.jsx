@@ -14,23 +14,22 @@ function TripDetails() {
   const passedTrip = location.state?.trip || null;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  const [tripData, setTripData] = useState(passedTrip);
+  const [editMode, setEditMode]       = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [error, setError]             = useState("");
+  const [tripData, setTripData]       = useState(passedTrip);
 
   useEffect(() => {
     requireAuth();
     if (passedTrip?.id) {
       tripsAPI.get(passedTrip.id)
-        .then(data => setTripData(data))
+        .then((data) => setTripData(data))
         .catch(() => {});
     }
   }, []);
 
   if (!tripData) {
-    return <div>Loading or No Trip Data</div>;
+    return <div className="trips-empty" style={{ padding: "40px" }}>Loading trip data...</div>;
   }
 
   async function handleSave() {
@@ -38,15 +37,15 @@ function TripDetails() {
     try {
       setSaving(true);
       const updated = await tripsAPI.update(tripData.id, {
-        client_name: tripData.client_name,
-        client_phone: tripData.client_phone,
-        pickup_location: tripData.pickup_location,
-        drop_location: tripData.drop_location,
-        reporting_time: tripData.reporting_time,
-        balance_amount: parseFloat(tripData.balance_amount) || 0,
-        payment_status: tripData.payment_status,
-        trip_status: tripData.trip_status,
-        notes: tripData.notes,
+        client_name:      tripData.client_name,
+        client_phone:     tripData.client_phone,
+        pickup_location:  tripData.pickup_location,
+        drop_location:    tripData.drop_location,
+        reporting_time:   tripData.reporting_time,
+        balance_amount:   parseFloat(tripData.balance_amount) || 0,
+        payment_status:   tripData.payment_status,
+        trip_status:      tripData.trip_status,
+        notes:            tripData.notes,
       });
       setTripData(updated);
       setEditMode(false);
@@ -57,7 +56,7 @@ function TripDetails() {
     }
   }
 
-  function field(label, key, isDate=false) {
+  function field(label, key, isDate = false) {
     return (
       <div className="td-detail-box">
         <p>{label}</p>
@@ -66,8 +65,8 @@ function TripDetails() {
             className="t-input"
             type={isDate ? "datetime-local" : "text"}
             value={
-              isDate && tripData[key] 
-                ? new Date(tripData[key]).toISOString().slice(0,16) 
+              isDate && tripData[key]
+                ? new Date(tripData[key]).toISOString().slice(0, 16)
                 : tripData[key] || ""
             }
             onChange={(e) => setTripData({ ...tripData, [key]: e.target.value })}
@@ -83,6 +82,15 @@ function TripDetails() {
     );
   }
 
+  const msgStatus = (label, sent) => (
+    <div className="td-row">
+      <span>{label}</span>
+      <span className={sent ? "msg-sent" : "msg-failed"}>
+        {sent ? "✓ Sent" : "✗ Failed"}
+      </span>
+    </div>
+  );
+
   return (
     <div className="dashboard-layout">
       <Sidebar sidebarOpen={sidebarOpen} />
@@ -90,55 +98,68 @@ function TripDetails() {
       <div className={`trips-content ${sidebarOpen ? "sidebar-open" : "sidebar-close"}`}>
         <Topbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        {error && (
-          <div style={{ background: "#fee2e2", color: "#ef4444", padding: "12px 16px", borderRadius: "10px", margin: "20px 32px 0", fontSize: "14px" }}>
-            ⚠ {error}
-          </div>
-        )}
+        {error && <div className="trips-error-banner">⚠ {error}</div>}
 
+        {/* ── Header ── */}
         <div className="trips-header">
           <div>
             <h1>Trip Details</h1>
-            <p>Dashboard &gt; Trips &gt; {tripData.id}</p>
+            <p>Dashboard &gt; Trips &gt; <span style={{ color: "#3b82f6" }}>{tripData.trip_id}</span></p>
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button className="btn-danger" onClick={() => navigate("/trips")}>Back</button>
+          <div className="trips-header-actions">
+            <button className="btn-danger" onClick={() => navigate("/trips")}>← Back</button>
             <button className="btn-primary" onClick={handleSave} disabled={saving}>
               {saving ? "Saving..." : editMode ? "Save Changes" : "Edit Trip"}
             </button>
           </div>
         </div>
 
+        {/* ── Top Grid: Trip Info + Assigned Resource ── */}
         <div className="td-grid-top">
+
+          {/* Trip Info */}
           <div className="td-panel">
             <h2>Trip Info</h2>
             <div className="td-details-grid">
-              {field("Client Name", "client_name")}
-              {field("Client Phone", "client_phone")}
+              {field("Client Name",     "client_name")}
+              {field("Client Phone",    "client_phone")}
               {field("Pickup Location", "pickup_location")}
-              {field("Drop Location", "drop_location")}
-              {field("Reporting Time", "reporting_time", true)}
-              
+              {field("Drop Location",   "drop_location")}
+              {field("Reporting Time",  "reporting_time", true)}
+
               <div className="td-detail-box">
                 <p>Trip Status</p>
                 {editMode ? (
-                  <select className="t-input" value={tripData.trip_status} onChange={(e) => setTripData({ ...tripData, trip_status: e.target.value })}>
+                  <select
+                    className="t-input"
+                    value={tripData.trip_status}
+                    onChange={(e) => setTripData({ ...tripData, trip_status: e.target.value })}
+                  >
                     <option value="Scheduled">Scheduled</option>
                     <option value="On Trip">On Trip</option>
                     <option value="Completed">Completed</option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
                 ) : (
-                  <h4>{tripData.trip_status}</h4>
+                  <h4>
+                    <span className={`status-badge ${
+                      tripData.trip_status === "Scheduled"  ? "active"      :
+                      tripData.trip_status === "On Trip"    ? "booked"      :
+                      tripData.trip_status === "Cancelled"  ? "maintenance" : "active"
+                    }`}>
+                      {tripData.trip_status}
+                    </span>
+                  </h4>
                 )}
               </div>
             </div>
-            
+
             <div style={{ marginTop: "16px" }}>
               {field("Special Notes", "notes")}
             </div>
           </div>
 
+          {/* Assigned Resource + Message Status */}
           <div className="td-panel">
             <h2>Assigned Resource</h2>
             <div className="td-row">
@@ -153,41 +174,46 @@ function TripDetails() {
               <span>Driver Phone</span>
               <span>{tripData.driver_phone || "—"}</span>
             </div>
-            
-            <h2 style={{ marginTop: "32px", fontSize: "15px" }}>Message Status</h2>
-            <div className="td-row">
-              <span>Driver SMS Sent</span>
-              <span style={{ color: tripData.driver_msg_sent ? "#10b981" : "#ef4444" }}>
-                {tripData.driver_msg_sent ? "Yes" : "Failed / No"}
-              </span>
-            </div>
-            <div className="td-row">
-              <span>Client SMS Sent</span>
-              <span style={{ color: tripData.client_msg_sent ? "#10b981" : "#ef4444" }}>
-                {tripData.client_msg_sent ? "Yes" : "Failed / No"}
-              </span>
-            </div>
-            <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "8px" }}>
-              * Duty reminders are automatically scheduled 2hr & 1hr before reporting time.
+
+            <div className="td-divider" />
+            <h2>Notification Status</h2>
+            {msgStatus("Driver Notified",  tripData.driver_msg_sent)}
+            {msgStatus("Client Notified",  tripData.client_msg_sent)}
+            <p className="td-hint">
+              * Duty reminders auto-schedule 2hr &amp; 1hr before reporting time.
             </p>
           </div>
         </div>
 
+        {/* ── Bottom Grid: Payment + Activity ── */}
         <div className="td-grid-bottom">
+
+          {/* Payment Details */}
           <div className="td-panel">
             <h2>Payment Details</h2>
             <div className="td-row">
               <span>Balance Amount</span>
               {editMode ? (
-                <input className="t-input" style={{ width: "120px" }} type="number" value={tripData.balance_amount} onChange={(e) => setTripData({ ...tripData, balance_amount: e.target.value })} />
+                <input
+                  className="t-input"
+                  style={{ width: "140px" }}
+                  type="number"
+                  value={tripData.balance_amount}
+                  onChange={(e) => setTripData({ ...tripData, balance_amount: e.target.value })}
+                />
               ) : (
-                <span>₹{tripData.balance_amount}</span>
+                <span>₹{tripData.balance_amount?.toLocaleString()}</span>
               )}
             </div>
             <div className="td-row">
               <span>Payment Status</span>
               {editMode ? (
-                <select className="t-input" style={{ width: "120px" }} value={tripData.payment_status} onChange={(e) => setTripData({ ...tripData, payment_status: e.target.value })}>
+                <select
+                  className="t-input"
+                  style={{ width: "140px" }}
+                  value={tripData.payment_status}
+                  onChange={(e) => setTripData({ ...tripData, payment_status: e.target.value })}
+                >
                   <option value="Pending">Pending</option>
                   <option value="Paid">Paid</option>
                 </select>
@@ -197,17 +223,18 @@ function TripDetails() {
                 </span>
               )}
             </div>
-            
+
             {tripData.payment_link && (
-              <div style={{ marginTop: "24px", padding: "16px", background: "#eff6ff", borderRadius: "8px", border: "1px dashed #93c5fd" }}>
-                <p style={{ margin: "0 0 8px 0", fontSize: "12px", color: "#1e3a8a", fontWeight: "600" }}>Dummy Razorpay Link (Sent to Client)</p>
-                <a href={tripData.payment_link} target="_blank" rel="noreferrer" style={{ fontSize: "14px", color: "#2563eb", wordBreak: "break-all" }}>
+              <div className="td-payment-link">
+                <p>Razorpay Link (sent to client)</p>
+                <a href={tripData.payment_link} target="_blank" rel="noreferrer">
                   {tripData.payment_link}
                 </a>
               </div>
             )}
           </div>
-          
+
+          {/* Activity Logs */}
           <div className="td-panel">
             <h2>Activity Logs</h2>
             <div className="td-row">
@@ -216,7 +243,11 @@ function TripDetails() {
             </div>
             <div className="td-row">
               <span>Last Updated</span>
-              <span>{new Date(tripData.updated_at).toLocaleString()}</span>
+              <span>{tripData.updated_at ? new Date(tripData.updated_at).toLocaleString() : "—"}</span>
+            </div>
+            <div className="td-row">
+              <span>Trip ID</span>
+              <span style={{ color: "#3b82f6", fontWeight: "700" }}>{tripData.trip_id}</span>
             </div>
           </div>
         </div>

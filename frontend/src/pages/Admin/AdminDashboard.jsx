@@ -166,22 +166,22 @@ function AdminDashboard() {
                 <div className="payment-card pending-gradient">
                   <span className="payment-icon">💳</span>
                   <div className="payment-details">
-                    <h3>Pending Payments</h3>
+                    <h3>Pending Balance</h3>
                     <p className="amount">
-                      {loading ? "$—" : `$${stats.payments?.pending_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      {loading ? "₹—" : `₹${stats.payments?.pending_amount?.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
                     </p>
-                    <span className="count-tag">{loading ? "—" : stats.payments?.pending_count} Pending Invoices</span>
+                    <span className="count-tag">{loading ? "—" : stats.payments?.pending_count} Pending Trips</span>
                   </div>
                 </div>
 
                 <div className="payment-card overdue-gradient">
                   <span className="payment-icon">🚨</span>
                   <div className="payment-details">
-                    <h3>Overdue Payments</h3>
+                    <h3>Overdue Balance</h3>
                     <p className="amount">
-                      {loading ? "$—" : `$${stats.payments?.overdue_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      {loading ? "₹—" : `₹${stats.payments?.overdue_amount?.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
                     </p>
-                    <span className="count-tag danger-tag">{loading ? "—" : stats.payments?.overdue_count} Overdue Invoices</span>
+                    <span className="count-tag danger-tag">{loading ? "—" : stats.payments?.overdue_count} Overdue Trips</span>
                   </div>
                 </div>
 

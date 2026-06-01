@@ -12,12 +12,19 @@ import VehicleDetails from "./pages/Admin/VehicleDetails";
 import Trips from "./pages/Admin/Trips";
 import TripDetails from "./pages/Admin/TripDetails";
 import Payments from "./pages/Admin/Payments";
+import Expenses from "./pages/Admin/Expenses";
+
 
 /* DRIVER PAGES */
 
 import DriverLogin from "./pages/Driver/DriverLogin";
 import DriverDashboard from "./pages/Driver/DriverDashboard";
 import Drivers from "./pages/Admin/Drivers";
+import DriverDutyLog from "./pages/Driver/DriverDutyLog";
+import DriverExpenses from "./pages/Driver/DriverExpenses";
+import DriverTrips from "./pages/Driver/DriverTrips";
+import DriverTripDetails from "./pages/Driver/DriverTripDetails";
+import DriverExpenseDetails from "./pages/Driver/DriverExpenseDetails";
 
 import "./App.css";
 
@@ -78,6 +85,8 @@ function App() {
             path="/payments"
             element={<Payments />}
           />
+          <Route path="/expenses" element={<Expenses />} />
+
 
           {/* DRIVER ROUTES */}
 
@@ -95,6 +104,11 @@ function App() {
             path="/driver-dashboard"
             element={<DriverDashboard />}
           />
+          <Route path="/driver-duty-log" element={<DriverDutyLog />} />
+          <Route path="/driver-expenses" element={<DriverExpenses />} />
+          <Route path="/driver-trips" element={<DriverTrips />}/>
+          <Route path="/driver/trips/:tripId" element={<DriverTripDetails />}/>
+          <Route path="/driver-expense/:expenseId" element={<DriverExpenseDetails />}/>
 
         </Routes>
 

@@ -15,7 +15,7 @@ vehicles = {}
 drivers = {}
 routes = {}
 
-# ─── Seed Data ────────────────────────────────────────────────
+
 vehicles = {
     "v1": {"id": "v1", "name": "TN-01-AB-1234", "type": "Container / Flatbed"},
     "v2": {"id": "v2", "name": "MH-02-CD-5678", "type": "Refrigerated Truck"},
@@ -32,16 +32,13 @@ routes = {
     "r3": {"id": "r3", "name": "Kolkata → Hyderabad"},
 }
 
-# ─── Helpers ──────────────────────────────────────────────────
+
 def generate_gr_number():
     return f"GR-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
 
 def generate_eway_bill():
     return f"EWB-{str(uuid.uuid4())[:10].upper()}"
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 5: Trip, Duty & Allotment Management
-# ═══════════════════════════════════════════════════════════════
 
 @app.route('/api/trips', methods=['GET'])
 def get_trips():
@@ -118,9 +115,7 @@ def update_tracking(trip_id):
     }
     return jsonify(trip['tracking'])
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 6: Expense Recorder
-# ═══════════════════════════════════════════════════════════════
+
 
 EXPENSE_CATEGORIES = [
     "Fuel (Diesel/Petrol)",
@@ -187,7 +182,7 @@ def calculate_profit(trip_id):
         "expense_breakdown": breakdown
     })
 
-# ─── Static reference data ────────────────────────────────────
+
 @app.route('/api/vehicles', methods=['GET'])
 def get_vehicles():
     return jsonify(list(vehicles.values()))
@@ -204,7 +199,7 @@ def get_routes():
 def get_expense_categories():
     return jsonify(EXPENSE_CATEGORIES)
 
-# ─── Serve frontend ───────────────────────────────────────────
+
 @app.route('/')
 def index():
     return send_from_directory('static', 'index.html')

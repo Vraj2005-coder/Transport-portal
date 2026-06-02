@@ -2,20 +2,36 @@
 Trips routes — CRUD endpoints for managing trips/bookings.
 
 Route summary:
-  GET  /api/trips        → List all trips
-  POST /api/trips        → Create a new trip (triggers messaging)
-  GET  /api/trips/{id}   → Get a single trip
-  PUT  /api/trips/{id}   → Update a trip
+  GET  /api/trips              → List all trips
+  POST /api/trips              → Create a new trip (triggers messaging)
+  GET  /api/trips/{id}         → Get a single trip
+  PUT  /api/trips/{id}         → Update a trip
+  DELETE /api/trips/all        → Delete all trips (cleanup)
+
+  POST /api/trips/{id}/duty-log  → Append duty log entry
+  PUT  /api/trips/{id}/location  → Driver pushes GPS coordinates (HTTP)
+  WS   /ws/trips/{id}/location   → Admin watches live GPS (WebSocket)
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
 
 from app.database import get_database
-from app.routes.auth import require_owner
-from app.schemas.trip import TripCreateRequest, TripResponse, TripUpdateRequest
+from app.routes.auth import get_current_user, require_owner
+from app.schemas.trip import (
+    TripCreateRequest,
+    TripResponse,
+    TripUpdateRequest,
+    DutyLogEntryRequest,
+    LocationUpdateRequest,
+)
 from app.services import trip_service
+from app.services.websocket_manager import ws_manager
 
 router = APIRouter()
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# List all trips
+# ──────────────────────────────────────────────────────────────────────────────
 
 @router.get(
     "/",
@@ -27,6 +43,10 @@ async def list_trips(current_owner=Depends(require_owner)):
     db = get_database()
     return await trip_service.get_all_trips(current_owner.id, db)
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Create a trip
+# ──────────────────────────────────────────────────────────────────────────────
 
 @router.post(
     "/",
@@ -40,8 +60,10 @@ async def create_trip(
 ):
     """
     Creates a new trip.
-    This also triggers Twilio SMS messages to the driver and client,
-    generates a payment link, and schedules reminders.
+    - Auto-generates GR number + E-way bill for truck vehicles
+    - Triggers Twilio SMS to driver and client
+    - Generates payment link
+    - Schedules duty reminders
     """
     db = get_database()
     try:
@@ -52,6 +74,10 @@ async def create_trip(
             detail=str(e),
         )
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Get single trip
+# ──────────────────────────────────────────────────────────────────────────────
 
 @router.get(
     "/{trip_id}",
@@ -70,6 +96,10 @@ async def get_trip(
     return trip
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Update a trip
+# ──────────────────────────────────────────────────────────────────────────────
+
 @router.put(
     "/{trip_id}",
     response_model=TripResponse,
@@ -80,13 +110,17 @@ async def update_trip(
     data: TripUpdateRequest,
     current_owner=Depends(require_owner),
 ):
-    """Update trip details and reschedule reminders if reporting time changed."""
+    """Update trip details. Admin can edit any field anytime."""
     db = get_database()
     trip = await trip_service.update_trip(trip_id, data, current_owner.id, db)
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     return trip
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Delete all trips (cleanup)
+# ──────────────────────────────────────────────────────────────────────────────
 
 @router.delete(
     "/all",
@@ -97,3 +131,94 @@ async def delete_all_trips(current_owner=Depends(require_owner)):
     db = get_database()
     deleted_count = await trip_service.delete_all_trips(current_owner.id, db)
     return {"message": f"Deleted {deleted_count} trips"}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Duty log — append entry
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.post(
+    "/{trip_id}/duty-log",
+    response_model=TripResponse,
+    summary="Append a duty log entry",
+)
+async def add_duty_log(
+    trip_id: str,
+    data: DutyLogEntryRequest,
+    current_user=Depends(get_current_user),
+):
+    """
+    Append a duty log entry to the trip.
+    Both owner and assigned driver can call this.
+    """
+    db = get_database()
+    trip = await trip_service.add_duty_log_entry(
+        trip_id=trip_id,
+        action=data.action,
+        note=data.note,
+        logged_by=current_user.name or current_user.email,
+        db=db,
+    )
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# GPS location — driver HTTP push (every ~1 second)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.put(
+    "/{trip_id}/location",
+    summary="Driver pushes current GPS coordinates",
+)
+async def update_location(
+    trip_id: str,
+    data: LocationUpdateRequest,
+    current_user=Depends(get_current_user),
+):
+    """
+    Driver-only: update live GPS coordinates for a trip.
+    Also broadcasts to all WebSocket viewers of this trip instantly.
+    Called by DriverDashboard.jsx every ~1 second via setInterval.
+    """
+    db = get_database()
+    ok = await trip_service.update_driver_location(
+        trip_id=trip_id,
+        driver_id=current_user.id,
+        lat=data.lat,
+        lng=data.lng,
+        db=db,
+    )
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Trip not found or you are not the assigned driver.",
+        )
+    return {"status": "ok", "lat": data.lat, "lng": data.lng}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# WebSocket — admin watches live GPS stream
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.websocket("/{trip_id}/location/ws")
+async def location_websocket(trip_id: str, websocket: WebSocket):
+    """
+    WebSocket endpoint for admin to receive real-time driver location.
+
+    Connect: ws://localhost:8000/api/trips/{trip_id}/location/ws
+    Messages received: { "lat": float, "lng": float, "ts": "ISO datetime string" }
+
+    The connection stays open until the admin closes the TripDetails page.
+    Each time the driver pushes a location update via PUT /location,
+    this endpoint immediately receives and forwards the payload.
+    """
+    await ws_manager.connect(trip_id, websocket)
+    try:
+        # Keep connection alive — we only send, never receive from admin
+        while True:
+            # Wait for any message (ping/pong keepalive or disconnect)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(trip_id, websocket)

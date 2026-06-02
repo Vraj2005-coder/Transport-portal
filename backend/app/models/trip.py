@@ -48,6 +48,22 @@ class TripInDB(BaseModel):
     reporting_time: datetime               # When driver must report
     notes: Optional[str] = None
 
+    # ── Truck-specific (auto-generated on creation) ─────────────────────────────
+    gr_number: Optional[str] = None        # Goods Receipt number e.g. "GR-20260601-4821"
+    eway_bill: Optional[str] = None        # E-way bill number e.g. "EWB-1748765432"
+
+    # ── Bus-specific (manual entry) ────────────────────────────────────────────
+    permit_number: Optional[str] = None    # Bus permit number
+    passing_info: Optional[str] = None     # Checkpoint / passing info
+
+    # ── Duty log (append-only timeline) ────────────────────────────────────────
+    duty_log: list = Field(default_factory=list)  # [{timestamp, action, note, logged_by}]
+
+    # ── Real-time GPS (pushed every ~1s by driver) ──────────────────────────────
+    driver_lat: Optional[float] = None     # Current latitude
+    driver_lng: Optional[float] = None     # Current longitude
+    location_updated_at: Optional[datetime] = None  # Last GPS push timestamp
+
     # ── Payment ────────────────────────────────────────────────────────────────
     trip_cost: float = 0.0
     amount_paid: float = 0.0
@@ -60,6 +76,11 @@ class TripInDB(BaseModel):
     # ── Message tracking ───────────────────────────────────────────────────────
     driver_msg_sent: bool = False
     client_msg_sent: bool = False
+
+    # ── Trip Metrics ───────────────────────────────────────────────────────────
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    distance_travelled_km: Optional[float] = None
 
     # ── Timestamps ─────────────────────────────────────────────────────────────
     created_at: datetime = Field(default_factory=datetime.utcnow)

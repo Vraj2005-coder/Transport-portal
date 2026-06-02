@@ -3,7 +3,7 @@ Pydantic schemas for Trip request/response bodies.
 Aligned with actual MongoDB document structure.
 """
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -24,6 +24,10 @@ class TripCreateRequest(BaseModel):
     balance_amount: float = 0.0            # Balance the client owes for this trip
     notes: Optional[str] = None
 
+    # Bus-specific (optional — leave blank for trucks)
+    permit_number: Optional[str] = None
+    passing_info: Optional[str] = None
+
 
 class TripUpdateRequest(BaseModel):
     """Body for PUT /api/trips/{id} — all fields optional."""
@@ -36,6 +40,31 @@ class TripUpdateRequest(BaseModel):
     payment_status: Optional[str] = None   # "Pending" | "Partial" | "Paid"
     trip_status: Optional[str] = None      # "Scheduled" | "On Trip" | "Completed" | "Cancelled"
     notes: Optional[str] = None
+    
+    # ── Trip Metrics
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    distance_travelled_km: Optional[float] = None
+
+    # Truck-specific (editable by admin)
+    gr_number: Optional[str] = None
+    eway_bill: Optional[str] = None
+
+    # Bus-specific
+    permit_number: Optional[str] = None
+    passing_info: Optional[str] = None
+
+
+class DutyLogEntryRequest(BaseModel):
+    """Body for POST /api/trips/{id}/duty-log — append one log entry."""
+    action: str                            # e.g. "Departed", "Reached Checkpoint"
+    note: Optional[str] = None
+
+
+class LocationUpdateRequest(BaseModel):
+    """Body for PUT /api/trips/{id}/location — driver pushes GPS coords."""
+    lat: float
+    lng: float
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -65,3 +94,24 @@ class TripResponse(BaseModel):
     driver_msg_sent: bool
     client_msg_sent: bool
     created_at: datetime
+
+    # ── Trip Metrics
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    distance_travelled_km: Optional[float] = None
+
+    # Truck-specific
+    gr_number: Optional[str] = None
+    eway_bill: Optional[str] = None
+
+    # Bus-specific
+    permit_number: Optional[str] = None
+    passing_info: Optional[str] = None
+
+    # Duty log
+    duty_log: list[Any] = []
+
+    # Real-time GPS
+    driver_lat: Optional[float] = None
+    driver_lng: Optional[float] = None
+    location_updated_at: Optional[datetime] = None

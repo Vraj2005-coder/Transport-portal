@@ -60,7 +60,7 @@ async function apiFetch(path, opts = {}, retry = true) {
   const token = getToken();
 
   const headers = {
-    "Content-Type": "application/json",
+    ...(opts.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...opts.headers,
   };
@@ -130,6 +130,25 @@ export const authAPI = {
   me: () => apiFetch("/auth/me"),
 };
 
+// ─── General File Upload ──────────────────────────────────────────────────────
+
+export const uploadAPI = {
+  uploadFile: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch("/upload/", { method: "POST", body: formData });
+  }
+};
+
+// ─── Expenses ─────────────────────────────────────────────────────────────────
+
+export const expensesAPI = {
+  create: (data) => apiFetch("/expenses/", { method: "POST", body: JSON.stringify(data) }),
+  getByTrip: (tripId) => apiFetch(`/expenses/?trip_id=${tripId}`),
+  getByVehicle: (vehicleId) => apiFetch(`/expenses/?vehicle_id=${vehicleId}`),
+  delete: (id) => apiFetch(`/expenses/${id}`, { method: "DELETE" }),
+};
+
 // ─── Vehicles ─────────────────────────────────────────────────────────────────
 
 export const vehiclesAPI = {
@@ -156,19 +175,22 @@ export const driversAPI = {
 // ─── Driver dashboard ─────────────────────────────────────────────────────────
 
 export const driverAPI = {
-  stats:       () => apiFetch("/driver/stats"),
-  currentTrip: () => apiFetch("/driver/current-trip"),
+  stats:            () =>        apiFetch("/driver/stats"),
+  currentTrip:      () =>        apiFetch("/driver/current-trip"),
+  updateTripStatus: (body) =>    apiFetch("/driver/trip-status", { method: "PUT", body: JSON.stringify(body) }),
 };
 
 // ─── Trips ────────────────────────────────────────────────────────────────────
 
 export const tripsAPI = {
-  list:      ()         => apiFetch("/trips/"),
-  get:       (id)       => apiFetch(`/trips/${id}`),
-  create:    (body)     => apiFetch("/trips/", { method: "POST", body: JSON.stringify(body) }),
-  update:    (id, body) => apiFetch(`/trips/${id}`, { method: "PUT",  body: JSON.stringify(body) }),
-  cancel:    (id)       => apiFetch(`/trips/${id}`, { method: "DELETE" }),
-  deleteAll: ()         => apiFetch("/trips/all", { method: "DELETE" }),
+  list:           ()         => apiFetch("/trips/"),
+  get:            (id)       => apiFetch(`/trips/${id}`),
+  create:         (body)     => apiFetch("/trips/", { method: "POST", body: JSON.stringify(body) }),
+  update:         (id, body) => apiFetch(`/trips/${id}`, { method: "PUT",  body: JSON.stringify(body) }),
+  cancel:         (id)       => apiFetch(`/trips/${id}`, { method: "DELETE" }),
+  deleteAll:      ()         => apiFetch("/trips/all", { method: "DELETE" }),
+  addDutyLog:     (id, body) => apiFetch(`/trips/${id}/duty-log`, { method: "POST", body: JSON.stringify(body) }),
+  updateLocation: (id, body) => apiFetch(`/trips/${id}/location`, { method: "PUT",  body: JSON.stringify(body) }),
 };
 
 // ─── Payments ─────────────────────────────────────────────────────────────────

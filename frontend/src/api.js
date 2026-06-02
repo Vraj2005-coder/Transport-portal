@@ -7,7 +7,14 @@
  * - If refresh fails (refresh token expired/missing), redirects to login
  */
 
-const BASE_URL = "http://localhost:8000/api";
+export const API_HOST = import.meta.env.VITE_API_HOST || window.location.hostname;
+export const API_PORT = import.meta.env.VITE_API_PORT || "8000";
+export const API_PROTOCOL = window.location.protocol === "https:" ? "https:" : "http:";
+export const WS_PROTOCOL = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+export const SERVER_URL = `${API_PROTOCOL}//${API_HOST}:${API_PORT}`;
+export const BASE_URL = `${SERVER_URL}/api`;
+export const WS_BASE_URL = `${WS_PROTOCOL}//${API_HOST}:${API_PORT}/api`;
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 

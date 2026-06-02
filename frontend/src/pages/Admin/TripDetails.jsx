@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
-import { tripsAPI, expensesAPI, requireAuth } from "../../api";
+import { tripsAPI, expensesAPI, vehiclesAPI, WS_BASE_URL, SERVER_URL, requireAuth } from "../../api";
 import "../../styles/Admin/AdminDashboard.css";
 import "../../styles/Admin/Trips.css";
 import "../../styles/Admin/TripDetails.css";
@@ -181,7 +181,7 @@ function TripDetails() {
   useEffect(() => {
     if (!tripData?.id) return;
 
-    const WS_URL = `ws://localhost:8000/api/trips/${tripData.id}/location/ws`;
+    const WS_URL = `${WS_BASE_URL}/trips/${tripData.id}/location/ws`;
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
@@ -587,7 +587,7 @@ function TripDetails() {
                     {exp.notes && <span style={{ color: "#64748b", fontSize: "12px", marginLeft: "8px" }}>- {exp.notes}</span>}
                     <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
                       {new Date(exp.date).toLocaleDateString()} by {exp.recorded_by}
-                      {exp.receipt_url && <a href={`http://localhost:8000${exp.receipt_url}`} target="_blank" rel="noreferrer" style={{ marginLeft: 8, color: "#3b82f6", textDecoration: "none" }}>🧾 View Receipt</a>}
+                      {exp.receipt_url && <a href={`${SERVER_URL}${exp.receipt_url}`} target="_blank" rel="noreferrer" style={{ marginLeft: 8, color: "#3b82f6", textDecoration: "none" }}>🧾 View Receipt</a>}
                       {exp.location_lat && <a href={`https://maps.google.com/?q=${exp.location_lat},${exp.location_lng}`} target="_blank" rel="noreferrer" style={{ marginLeft: 8, color: "#10b981", textDecoration: "none" }}>📍 Geotagged</a>}
                     </div>
                   </div>

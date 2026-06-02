@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import { driverAPI, tripsAPI, expensesAPI, uploadAPI, requireAuth, logout } from "../../api";
+import { driverAPI, tripsAPI, expensesAPI, uploadAPI, requireAuth, logout, WS_BASE_URL } from "../../api";
 import "../../styles/Driver/DriverDashboard.css";
 
 // ── Fix Leaflet default icons ─────────────────────────────────────────────────
@@ -282,7 +282,7 @@ function DriverDashboard() {
   // ── WebSocket (receive admin-pushed location updates, future use) ────────
   useEffect(() => {
     if (!trip?.id) return;
-    const ws = new WebSocket(`ws://localhost:8000/api/trips/${trip.id}/location/ws`);
+    const ws = new WebSocket(`${WS_BASE_URL}/trips/${trip.id}/location/ws`);
     wsRef.current = ws;
     ws.onmessage = (e) => {
       try {

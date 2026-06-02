@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import "../../styles/Driver/DriverLogin.css";
+import { BASE_URL } from "../../api";
 
 function DriverLogin() {
 
@@ -27,7 +28,7 @@ function DriverLogin() {
     try {
 
       const response = await fetch(
-        "http://localhost:8000/api/auth/login",
+        `${BASE_URL}/auth/login`,
         {
           method: "POST",
 

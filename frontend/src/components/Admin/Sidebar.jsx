@@ -7,13 +7,14 @@ function Sidebar({ sidebarOpen }) {
   const location  = useLocation();
 
   const menuItems = [
-    { name: "Dashboard", path: "/admin-dashboard" },
-    { name: "Vehicles",  path: "/vehicles" },
-    { name: "Drivers",   path: "/drivers" },
-    { name: "Trips",     path: "/trips" },
-    { name: "Documents", path: "/documents" },
-    { name: "Settings",  path: "/settings" },
-    {name: "Payment & Balance", path: "/payments",}
+    { name: "Dashboard",        path: "/admin-dashboard" },
+    { name: "Vehicles",         path: "/vehicles" },
+    { name: "Drivers",          path: "/drivers" },
+    { name: "Trips",            path: "/trips" },
+    { name: "Expenses",         path: "/expenses" },
+    { name: "Documents",        path: "/documents" },
+    { name: "Payment & Balance",path: "/payments" },
+    { name: "Settings",         path: "/settings" },
   ];
 
   const handleLogout = () => {
@@ -35,21 +36,20 @@ function Sidebar({ sidebarOpen }) {
           const isActive =
             location.pathname === item.path ||
             (item.path === "/vehicles" && location.pathname === "/vehicle-details") ||
-            (item.path === "/trips" && location.pathname === "/trip-details") ||
+            (item.path === "/trips"    && location.pathname === "/trip-details") ||
             (item.path === "/payments" && location.pathname === "/payment-details");
 
           return (
             <li
               key={index}
               onClick={() => navigate(item.path)}
-              style={{
-                background: isActive ? "#2563eb" : "transparent",
-              }}
+              style={{ background: isActive ? "#2563eb" : "transparent" }}
             >
               {item.name}
             </li>
           );
         })}
+
         <li
           onClick={handleLogout}
           style={{

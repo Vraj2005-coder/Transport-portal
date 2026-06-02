@@ -1,0 +1,85 @@
+.driver-sidebar {
+  width: 280px;
+  height: 100vh;
+
+  background: #07163d;
+  color: white;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.driver-sidebar.closed {
+  width: 85px;
+}
+
+.sidebar-logo {
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-logo h2 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.driver-sidebar ul {
+  list-style: none;
+  padding: 20px 12px;
+}
+
+.driver-sidebar li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 16px;
+  margin-bottom: 8px;
+
+  border-radius: 12px;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.driver-sidebar li:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.driver-sidebar li.active {
+  background: #2563eb;
+}
+
+.driver-sidebar.closed span {
+  display: none;
+}
+
+.logout-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  right: 12px;
+
+  padding: 14px;
+  border: none;
+
+  background: #dc2626;
+  color: white;
+
+  border-radius: 12px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}

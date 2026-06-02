@@ -1,0 +1,366 @@
+/* ===================================
+   DRIVER EXPENSES PAGE
+=================================== */
+
+.expenses-page {
+  padding: 24px;
+}
+
+/* HEADER */
+
+.expenses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.expenses-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.expenses-header p {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.add-expense-btn {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.add-expense-btn:hover {
+  background: #1d4ed8;
+}
+
+/* KPI SECTION */
+
+.expense-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.expense-kpi {
+  min-height: 110px;
+  border-radius: 18px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+
+  transition: all 0.25s ease;
+}
+
+.expense-kpi:hover {
+  transform: translateY(-3px);
+}
+
+.expense-kpi h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827 !important;
+}
+
+.expense-kpi span {
+  display: block;
+  margin-top: 10px;
+
+  font-size: 30px;
+  font-weight: 700;
+
+  color: #000000 !important;
+  line-height: 1;
+}
+
+.expense-kpi.blue {
+  background: #eef6ff;
+  border-left: 5px solid #3b82f6;
+}
+
+.expense-kpi.green {
+  background: #f0fdf4;
+  border-left: 5px solid #22c55e;
+}
+
+.expense-kpi.orange {
+  background: #fff7ed;
+  border-left: 5px solid #f97316;
+}
+
+.expense-kpi.red {
+  background: #fef2f2;
+  border-left: 5px solid #ef4444;
+}
+
+/* HISTORY CARD */
+
+.expense-history-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.expense-history-card h2 {
+  margin: 0 0 20px;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* TABLE */
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expense-table th {
+  background: #f8fafc;
+  color: #475569;
+  text-align: left;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.expense-table td {
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.expense-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.empty-row {
+  text-align: center;
+  color: #64748b;
+  padding: 30px !important;
+}
+
+/* STATUS BADGES */
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-badge.verified {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* BUTTONS */
+
+.view-details-btn {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.view-details-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ==========================
+   ADD EXPENSE MODAL
+========================== */
+
+.expense-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+.expense-modal {
+  width: 700px;
+  max-width: 95%;
+
+  background: #ffffff;
+
+  border-radius: 20px;
+  padding: 24px;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.expense-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 24px;
+}
+
+.expense-modal-header h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.close-modal-btn {
+  border: none;
+  background: #ef4444;
+  color: white;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.expense-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.expense-form-grid label {
+  display: block;
+  margin-bottom: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #334155;
+}
+
+.expense-form-grid input,
+.expense-form-grid select {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+.expense-form-grid input:focus,
+.expense-form-grid select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.expense-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+.cancel-btn {
+  border: none;
+  background: #e2e8f0;
+  color: #0f172a;
+
+  padding: 12px 18px;
+  border-radius: 10px;
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn {
+  border: none;
+  background: #2563eb;
+  color: white;
+
+  padding: 12px 18px;
+  border-radius: 10px;
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #1d4ed8;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+  .expense-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+
+  .expenses-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .expense-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-history-card {
+    overflow-x: auto;
+  }
+
+  .expense-table {
+    min-width: 900px;
+  }
+
+  .expenses-header h1 {
+    font-size: 28px;
+  }
+
+  .expense-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-modal {
+    width: 95%;
+  }
+}

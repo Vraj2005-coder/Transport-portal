@@ -33,7 +33,7 @@ function Topbar({
       <div className="topbar-right">
 
         <div className="date-box">
-          📅 23 May 2025
+          
         </div>
 
         <div className="notification-icon">
@@ -41,7 +41,7 @@ function Topbar({
           🔔
 
           <span className="notification-dot">
-            5
+            
           </span>
 
         </div>

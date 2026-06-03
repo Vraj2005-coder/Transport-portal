@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import DriverSidebar from "../../components/Driver/DriverSidebar";
@@ -12,58 +12,21 @@ function DriverExpenseDetails() {
   const navigate = useNavigate();
   const { expenseId } = useParams();
 
-  // Dummy Data
-  // Backend will replace this later
-  const expenseDetails = {
-    expenseId: expenseId,
-    tripId: "TRP-1001",
-    vehicle: "MH01AB1234",
-    submittedDate: "01-06-2026",
-    verificationStatus: "Verified",
-    adminRemarks:
-      "All receipts verified successfully.",
+  // Backend data will come here
+  const [expenseDetails, setExpenseDetails] =
+    useState(null);
 
-    expenses: [
-      {
-        id: 1,
-        type: "Fuel",
-        amount: 4500,
-        date: "01-06-2026",
-        receipt: "fuel_receipt.jpg",
-        status: "Verified",
-      },
-      {
-        id: 2,
-        type: "Toll Charges",
-        amount: 850,
-        date: "01-06-2026",
-        receipt: "toll_receipt.jpg",
-        status: "Verified",
-      },
-      {
-        id: 3,
-        type: "Parking Fee",
-        amount: 200,
-        date: "01-06-2026",
-        receipt: "parking_receipt.jpg",
-        status: "Pending",
-      },
-      {
-        id: 4,
-        type: "Food / Canteen",
-        amount: 100,
-        date: "01-06-2026",
-        receipt: "food_receipt.jpg",
-        status: "Verified",
-      },
-    ],
-  };
+  useEffect(() => {
+    // Future Backend Call
+    // loadExpenseDetails();
+  }, [expenseId]);
 
   const totalExpense =
-    expenseDetails.expenses.reduce(
-      (sum, item) => sum + item.amount,
+    expenseDetails?.expenses?.reduce(
+      (sum, item) =>
+        sum + Number(item.amount || 0),
       0
-    );
+    ) || 0;
 
   return (
     <div className="driver-layout">
@@ -77,7 +40,6 @@ function DriverExpenseDetails() {
             : "sidebar-closed"
         }`}
       >
-
         <DriverNavbar
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
@@ -95,203 +57,196 @@ function DriverExpenseDetails() {
             ← Back To Expenses
           </button>
 
-          {/* HEADER CARD */}
+          {!expenseDetails ? (
 
-          <div className="expense-detail-card">
+            <div className="expense-detail-card">
+              <h2>
+                No Expense Details Found
+              </h2>
 
-            <h1>Expense Details</h1>
-
-            <div className="detail-row">
-              <span>Expense ID</span>
-              <strong>
-                {expenseDetails.expenseId}
-              </strong>
+              <p>
+                Expense records will appear
+                here once loaded from the
+                backend.
+              </p>
             </div>
 
-            <div className="detail-row">
-              <span>Trip ID</span>
-              <strong>
-                {expenseDetails.tripId}
-              </strong>
-            </div>
+          ) : (
 
-            <div className="detail-row">
-              <span>Vehicle</span>
-              <strong>
-                {expenseDetails.vehicle}
-              </strong>
-            </div>
+            <>
+              {/* HEADER */}
 
-            <div className="detail-row">
-              <span>Submitted Date</span>
-              <strong>
-                {
-                  expenseDetails.submittedDate
-                }
-              </strong>
-            </div>
+              <div className="expense-detail-card">
 
-            <div className="detail-row">
-              <span>Total Expense</span>
-              <strong>
-                ₹
-                {totalExpense.toLocaleString()}
-              </strong>
-            </div>
+                <h1>Expense Details</h1>
 
-            <div className="detail-row">
-              <span>Status</span>
+                <div className="detail-row">
+                  <span>Trip ID</span>
 
-              <strong
-                className={
-                  expenseDetails.verificationStatus.toLowerCase()
-                }
-              >
-                {
-                  expenseDetails.verificationStatus
-                }
-              </strong>
-            </div>
+                  <strong>
+                    {expenseDetails.tripId}
+                  </strong>
+                </div>
 
-          </div>
+                <div className="detail-row">
+                  <span>Vehicle</span>
 
-          {/* EXPENSE BREAKDOWN */}
+                  <strong>
+                    {expenseDetails.vehicle}
+                  </strong>
+                </div>
 
-          <div className="expense-detail-card">
+                <div className="detail-row">
+                  <span>
+                    Submitted Date
+                  </span>
 
-            <h2>Expense Breakdown</h2>
+                  <strong>
+                    {
+                      expenseDetails.submittedDate
+                    }
+                  </strong>
+                </div>
 
-            <table className="breakdown-table">
+                <div className="detail-row">
+                  <span>
+                    Total Expense
+                  </span>
 
-              <thead>
-                <tr>
-                  <th>Expense Type</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Receipt</th>
-                  <th>Verification</th>
-                </tr>
-              </thead>
+                  <strong>
+                    ₹
+                    {totalExpense.toLocaleString()}
+                  </strong>
+                </div>
 
-              <tbody>
+              </div>
 
-                {expenseDetails.expenses.map(
-                  (expense) => (
-                    <tr key={expense.id}>
+              {/* BREAKDOWN */}
 
-                      <td>
-                        {expense.type}
-                      </td>
+              <div className="expense-detail-card">
 
-                      <td>
-                        ₹
-                        {expense.amount.toLocaleString()}
-                      </td>
+                <h2>
+                  Expense Breakdown
+                </h2>
 
-                      <td>
-                        {expense.date}
-                      </td>
+                <table className="breakdown-table">
 
-                      <td>
+                  <thead>
+                    <tr>
+                      <th>
+                        Expense Type
+                      </th>
 
-                        <button className="receipt-btn">
-                          View Receipt
-                        </button>
+                      <th>
+                        Amount
+                      </th>
 
-                      </td>
+                      <th>
+                        Date
+                      </th>
 
-                      <td>
-
-                        <span
-                          className={`status-badge ${
-                            expense.status.toLowerCase()
-                          }`}
-                        >
-                          {expense.status}
-                        </span>
-
-                      </td>
-
+                      <th>
+                        Receipt
+                      </th>
                     </tr>
-                  )
-                )}
+                  </thead>
 
-              </tbody>
+                  <tbody>
 
-            </table>
+                    {expenseDetails.expenses
+                      ?.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="4"
+                        >
+                          No expenses found
+                        </td>
+                      </tr>
+                    ) : (
+                      expenseDetails.expenses?.map(
+                        (expense) => (
+                          <tr
+                            key={
+                              expense.id
+                            }
+                          >
+                            <td>
+                              {
+                                expense.type
+                              }
+                            </td>
 
-          </div>
+                            <td>
+                              ₹
+                              {Number(
+                                expense.amount
+                              ).toLocaleString()}
+                            </td>
 
-          {/* RECEIPT SECTION */}
+                            <td>
+                              {
+                                expense.date
+                              }
+                            </td>
 
-          <div className="expense-detail-card">
+                            <td>
 
-            <h2>Uploaded Receipts</h2>
+                              <button className="receipt-btn">
+                                View Receipt
+                              </button>
 
-            <div className="receipt-grid">
+                            </td>
 
-              {expenseDetails.expenses.map(
-                (expense) => (
-                  <div
-                    key={expense.id}
-                    className="receipt-card"
-                  >
+                          </tr>
+                        )
+                      )
+                    )}
 
-                    <div className="receipt-placeholder">
+                  </tbody>
 
-                      Receipt Image
+                </table>
 
-                    </div>
+              </div>
 
-                    <p>
-                      {expense.receipt}
-                    </p>
+              {/* RECEIPTS */}
 
-                    <span
-                      className={`status-badge ${
-                        expense.status.toLowerCase()
-                      }`}
-                    >
-                      {expense.status}
-                    </span>
+              <div className="expense-detail-card">
 
-                  </div>
-                )
-              )}
+                <h2>
+                  Uploaded Receipts
+                </h2>
 
-            </div>
+                <div className="receipt-grid">
 
-          </div>
+                  {expenseDetails.expenses?.map(
+                    (expense) => (
+                      <div
+                        key={
+                          expense.id
+                        }
+                        className="receipt-card"
+                      >
 
-          {/* ADMIN VERIFICATION */}
+                        <div className="receipt-placeholder">
+                          Receipt Image
+                        </div>
 
-          <div className="expense-detail-card">
+                        <p>
+                          {
+                            expense.receipt
+                          }
+                        </p>
 
-            <h2>
-              Admin Verification
-            </h2>
+                      </div>
+                    )
+                  )}
 
-            <div className="detail-row">
-              <span>
-                Verification Status
-              </span>
+                </div>
 
-              <strong>
-                {
-                  expenseDetails.verificationStatus
-                }
-              </strong>
-            </div>
+              </div>
 
-            <div className="remarks-box">
-
-              {
-                expenseDetails.adminRemarks
-              }
-
-            </div>
-
-          </div>
+            </>
+          )}
 
         </div>
 

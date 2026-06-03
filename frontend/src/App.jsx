@@ -12,7 +12,6 @@ import VehicleDetails from "./pages/Admin/VehicleDetails";
 import Trips from "./pages/Admin/Trips";
 import TripDetails from "./pages/Admin/TripDetails";
 import Payments from "./pages/Admin/Payments";
-import Expenses from "./pages/Admin/Expenses";
 
 
 /* DRIVER PAGES */
@@ -85,7 +84,6 @@ function App() {
             path="/payments"
             element={<Payments />}
           />
-          <Route path="/expenses" element={<Expenses />} />
 
 
           {/* DRIVER ROUTES */}

@@ -3,8 +3,12 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+import DriverNavbar from "../../components/Driver/DriverNavbar";
+import DriverSidebar from "../../components/Driver/DriverSidebar";
+
 import { driverAPI, tripsAPI, expensesAPI, uploadAPI, requireAuth, logout, WS_BASE_URL } from "../../api";
 import "../../styles/Driver/DriverDashboard.css";
+
 
 // ── Fix Leaflet default icons ─────────────────────────────────────────────────
 delete L.Icon.Default.prototype._getIconUrl;
@@ -127,6 +131,8 @@ function haversineDistance(pos1, pos2) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DriverDashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [stats, setStats]               = useState(null);
   const [trip, setTrip]                 = useState(null);
   const [loading, setLoading]           = useState(true);
@@ -407,7 +413,7 @@ function DriverDashboard() {
     <div className="drv-layout">
 
       {/* ── Sidebar ── */}
-      <div className="drv-sidebar">
+      {/* <div className="drv-sidebar">
         <div className="drv-sidebar-brand">
           <span className="drv-brand-icon">🚗</span>
           <span>Driver Panel</span>
@@ -425,13 +431,17 @@ function DriverDashboard() {
         >
           🚪 Logout
         </div>
-      </div>
+      </div> */}
 
-      {/* ── Main ── */}
-      <div className="drv-main">
-
+      <DriverSidebar isOpen={sidebarOpen} />
+      
+      <div
+         className={`drv-main ${
+         sidebarOpen ? "sidebar-open" : "sidebar-closed"
+        }`}
+      >
         {/* Topbar */}
-        <div className="drv-topbar">
+        {/* <div className="drv-topbar">
           <div>
             <h1>Driver Dashboard</h1>
             <p>Your active trip and live route map</p>
@@ -447,8 +457,13 @@ function DriverDashboard() {
             )}
             <div className="drv-avatar">D</div>
           </div>
-        </div>
-
+        </div> */}
+        
+        <DriverNavbar
+          toggleSidebar={() =>
+         setSidebarOpen(!sidebarOpen)
+         }
+        />
         {error && <div className="drv-error">⚠ {error}</div>}
 
         {/* ── Stat Cards ── */}

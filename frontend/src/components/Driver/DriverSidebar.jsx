@@ -27,11 +27,7 @@ function DriverSidebar({ isOpen }) {
       path: "/driver-trips",
       icon: <Truck size={20} />
     },
-    {
-      name: "Assigned Vehicle",
-      path: "/assigned-vehicle",
-      icon: <Car size={20} />
-    },
+    
     {
       name: "Duty Log",
       path: "/driver-duty-log",

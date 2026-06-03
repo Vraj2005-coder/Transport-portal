@@ -11,7 +11,6 @@ function Sidebar({ sidebarOpen }) {
     { name: "Vehicles",         path: "/vehicles" },
     { name: "Drivers",          path: "/drivers" },
     { name: "Trips",            path: "/trips" },
-    { name: "Expenses",         path: "/expenses" },
     { name: "Documents",        path: "/documents" },
     { name: "Payment & Balance",path: "/payments" },
     { name: "Settings",         path: "/settings" },

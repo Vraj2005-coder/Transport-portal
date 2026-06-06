@@ -1,66 +1,119 @@
-import "../../styles/Admin/Topbar.css";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+import "../../styles/Admin/topbar.css";
+
+import {
+  FiMenu,
+  FiBell,
+  FiChevronDown,
+} from "react-icons/fi";
+
+import { authAPI } from "../../api";
 
 function Topbar({
   sidebarOpen,
   setSidebarOpen,
 }) {
 
+  const location = useLocation();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const data = await authAPI.me();
+        setUser(data);
+      } catch (error) {
+        console.error("Failed to load user:", error);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const pageTitles = {
+    "/admin-dashboard": "Dashboard",
+
+    "/vehicles": "Vehicles",
+    "/vehicle-details": "Vehicle Details",
+
+    "/drivers": "Drivers",
+
+    "/trips": "Trips",
+    "/trip-details": "Trip Details",
+
+    "/payments": "Payments",
+
+    "/expenses": "Expenses",
+    "/expense-details": "Expense Details",
+
+    "/documents": "Documents",
+
+    "/settings": "Settings",
+  };
+
+  const pageTitle =
+    pageTitles[location.pathname] || "Dashboard";
+
   return (
-
-    <div className="topbar">
-
-      {/* LEFT SIDE */}
+    <header className="topbar">
 
       <div className="topbar-left">
 
         <button
           className="menu-btn"
-          onClick={() =>
-            setSidebarOpen(!sidebarOpen)
-          }
+          onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          ☰
+          <FiMenu />
         </button>
 
-        <h2 className="navbar-logo">
-          TMS Admin
-        </h2>
+        <div className="page-info">
+          <h1 className="page-title">
+            {pageTitle}
+          </h1>
+
+          <span className="page-path">
+            Transport Management System
+          </span>
+        </div>
 
       </div>
-
-      {/* RIGHT SIDE */}
 
       <div className="topbar-right">
 
-        <div className="date-box">
-          
-        </div>
-
-        <div className="notification-icon">
-
-          🔔
-
-          <span className="notification-dot">
-            
-          </span>
-
-        </div>
+        <button className="notification-btn">
+          <FiBell />
+        </button>
 
         <div className="profile-box">
 
-          <div className="profile-circle">
-            A
+          <div className="profile-avatar">
+            {user?.name
+              ? user.name.charAt(0).toUpperCase()
+              : "A"}
           </div>
 
-          <span className="profile-name">
-            Admin
-          </span>
+          <div className="profile-details">
+
+            <span className="profile-name">
+              {user?.name || "Admin"}
+            </span>
+
+            <span className="profile-role">
+              {user?.role || "User"}
+            </span>
+
+          </div>
+
+          <FiChevronDown className="profile-arrow" />
 
         </div>
 
       </div>
 
-    </div>
+    </header>
   );
 }
 

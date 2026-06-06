@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { FaTruck, FaUserTie, FaRoute, FaFileAlt } from "react-icons/fa";
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
 import { adminAPI, requireAuth } from "../../api";
@@ -67,29 +67,46 @@ function AdminDashboard() {
         )}
 
         {/* DASHBOARD CARDS */}
-        <div className="cards">
+        {/* DASHBOARD CARDS */}
+<div className="cards">
 
-          <div className="card green">
-            <h3>Total Vehicles</h3>
-            <p>{loading ? "—" : stats.total_vehicles}</p>
-          </div>
+  <div className="card">
+    <h3>Total Vehicles</h3>
+    <p>{loading ? "—" : stats.total_vehicles}</p>
 
-          <div className="card blue">
-            <h3>Active Drivers</h3>
-            <p>{loading ? "—" : stats.active_drivers}</p>
-          </div>
+    <div className="dashboard-icon vehicles">
+      <FaTruck />
+    </div>
+  </div>
 
-          <div className="card white">
-            <h3>Trips Today</h3>
-            <p>{loading ? "—" : stats.trips_today}</p>
-          </div>
+  <div className="card">
+    <h3>Active Drivers</h3>
+    <p>{loading ? "—" : stats.active_drivers}</p>
 
-          <div className="card orange">
-            <h3>Pending Documents</h3>
-            <p>{loading ? "—" : stats.pending_documents}</p>
-          </div>
+    <div className="dashboard-icon drivers">
+      <FaUserTie />
+    </div>
+  </div>
 
-        </div>
+  <div className="card">
+    <h3>Trips Today</h3>
+    <p>{loading ? "—" : stats.trips_today}</p>
+
+    <div className="dashboard-icon trips">
+      <FaRoute />
+    </div>
+  </div>
+
+  <div className="card">
+    <h3>Pending Documents</h3>
+    <p>{loading ? "—" : stats.pending_documents}</p>
+
+    <div className="dashboard-icon docs">
+      <FaFileAlt />
+    </div>
+  </div>
+
+</div>
 
         {/* ROW 2: LIVE STATUS & TYPES + PAYMENTS */}
         <div className="dashboard-grid-row">

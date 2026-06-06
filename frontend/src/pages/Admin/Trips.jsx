@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import {FaClipboardList,FaTruckMoving,FaCheckCircle, FaRoute,} from "react-icons/fa";
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
 import { tripsAPI, vehiclesAPI, requireAuth } from "../../api";
@@ -160,31 +160,56 @@ function Trips() {
             <button className="btn-danger" onClick={handleClearAll} disabled={loading || trips.length === 0}>
               Clear All Trips
             </button>
-            <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+            <button className="btn-trip" onClick={() => setShowForm(!showForm)}>
               {showForm ? "Hide Form" : "+ Create Trip"}
             </button>
           </div>
         </div>
 
         {/* ── Stat Cards ── */}
-        <div className="trips-cards">
-          <div className="t-card green">
-            <h3>Scheduled</h3>
-            <p>{loading ? "—" : scheduledCount}</p>
-          </div>
-          <div className="t-card blue">
-            <h3>On Trip</h3>
-            <p>{loading ? "—" : onTripCount}</p>
-          </div>
-          <div className="t-card orange">
-            <h3>Completed</h3>
-            <p>{loading ? "—" : completedCount}</p>
-          </div>
-          <div className="t-card white">
-            <h3>Total Trips</h3>
-            <p>{loading ? "—" : trips.length}</p>
-          </div>
-        </div>
+          <div className="trips-cards">
+
+    <div className="t-card">
+      <div className="trip-icon scheduled">
+        <FaClipboardList />
+      </div>
+
+      <h3>Scheduled</h3>
+
+      <p>{loading ? "—" : scheduledCount}</p>
+    </div>
+
+    <div className="t-card">
+      <div className="trip-icon ontrip">
+        <FaTruckMoving />
+      </div>
+
+      <h3>On Trip</h3>
+
+      <p>{loading ? "—" : onTripCount}</p>
+    </div>
+
+    <div className="t-card">
+      <div className="trip-icon completed">
+        <FaCheckCircle />
+      </div>
+
+      <h3>Completed</h3>
+
+      <p>{loading ? "—" : completedCount}</p>
+    </div>
+
+    <div className="t-card">
+      <div className="trip-icon total">
+        <FaRoute />
+      </div>
+
+      <h3>Total Trips</h3>
+
+      <p>{loading  ? "—" : trips.length}</p>
+    </div>
+
+  </div>
 
         {/* ── Create Trip Form ── */}
         {showForm && (

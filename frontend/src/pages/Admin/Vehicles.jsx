@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
+import {FaTruck, FaClipboardList,FaTools,FaCar} from "react-icons/fa";
 
 import {
   vehiclesAPI,
@@ -456,12 +457,12 @@ const busMatch =
           </div>
 
           <button
-            className="btn-primary"
+            className="btn-Vehicle"
             onClick={() =>
               setShowForm(!showForm)
             }
           >
-            + Add Vehicle
+            {showForm ? "Hide Form" : "+  Add Vehicle"}
           </button>
 
         </div>
@@ -469,59 +470,47 @@ const busMatch =
         {/* =====================================================
             DASHBOARD CARDS
         ===================================================== */}
+         
+         <div className="vehicles-cards">
 
-        <div className="vehicles-cards">
+  <div className="v-card">
+    <div className="kpi-icon available">
+      <FaTruck />
+    </div>
 
-          <div className="v-card green">
+    <h3>Available </h3>
+    <p>{availableVehicles}</p>
+  </div>
 
-            <h3>
-              Available Vehicles
-            </h3>
+  <div className="v-card">
+    <div className="kpi-icon booked">
+      <FaClipboardList />
+    </div>
 
-            <p>
-              {availableVehicles}
-            </p>
+    <h3>Booked </h3>
+    <p>{bookedVehicles}</p>
+  </div>
 
-          </div>
+  <div className="v-card">
+    <div className="kpi-icon maintenance">
+      <FaTools />
+    </div>
 
-          <div className="v-card blue">
+    <h3>Maintenance</h3>
+    <p>{maintenanceVehicles}</p>
+  </div>
 
-            <h3>
-              Booked Vehicles
-            </h3>
+  <div className="v-card">
+    <div className="kpi-icon total">
+      <FaCar />
+    </div>
 
-            <p>
-              {bookedVehicles}
-            </p>
+    <h3>Total Vehicles</h3>
+    <p>{vehicles.length}</p>
+  </div>
 
-          </div>
-
-          <div className="v-card orange">
-
-            <h3>
-              Maintenance
-            </h3>
-
-            <p>
-              {maintenanceVehicles}
-            </p>
-
-          </div>
-
-          <div className="v-card white">
-
-            <h3>
-              Total Vehicles
-            </h3>
-
-            <p>
-              {vehicles.length}
-            </p>
-
-          </div>
-
-        </div>
-
+</div>
+       
         {/* =====================================================
             FILTER SECTION
         ===================================================== */}

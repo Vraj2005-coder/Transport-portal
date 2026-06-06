@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { FaUserCheck, FaUserClock, FaUserTie, FaUsers } from "react-icons/fa";
 import Sidebar from "../../components/Admin/Sidebar";
 import Topbar from "../../components/Admin/Topbar";
 import { driversAPI, vehiclesAPI, requireAuth } from "../../api";
@@ -152,13 +152,13 @@ function Drivers() {
             <h1>Drivers Management</h1>
             <p>Manage and provision vendor driver accounts</p>
           </div>
-          <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+          <button className="btn-Driver" onClick={() => setShowForm(!showForm)}>
             {showForm ? "Hide Form" : "+ Add Driver"}
           </button>
         </div>
 
         {/* STAT CARDS */}
-        <div className="drivers-cards">
+        {/* <div className="drivers-cards">
           <div className="d-card green">
             <h3>Active Drivers</h3>
             <p>{loading ? "—" : activeCount}</p>
@@ -175,7 +175,7 @@ function Drivers() {
             <h3>Total Drivers</h3>
             <p>{loading ? "—" : drivers.length}</p>
           </div>
-        </div>
+        </div> */}
 
         {/* ADD DRIVER FORM */}
         {showForm && (

@@ -1,19 +1,59 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../api";
 
-function Sidebar({ sidebarOpen }) {
+import {
+  FiHome,
+  FiTruck,
+  FiUsers,
+  FiMap,
+  FiFileText,
+  FiCreditCard,
+  FiSettings,
+  FiLogOut,
+} from "react-icons/fi";
 
-  const navigate  = useNavigate();
-  const location  = useLocation();
+import "../../styles/Admin/sidebar.css";
+
+function Sidebar({ sidebarOpen }) {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
-    { name: "Dashboard",        path: "/admin-dashboard" },
-    { name: "Vehicles",         path: "/vehicles" },
-    { name: "Drivers",          path: "/drivers" },
-    { name: "Trips",            path: "/trips" },
-    { name: "Documents",        path: "/documents" },
-    { name: "Payment & Balance",path: "/payments" },
-    { name: "Settings",         path: "/settings" },
+    {
+      name: "Dashboard",
+      path: "/admin-dashboard",
+      icon: <FiHome />,
+    },
+    {
+      name: "Vehicles",
+      path: "/vehicles",
+      icon: <FiTruck />,
+    },
+    {
+      name: "Drivers",
+      path: "/drivers",
+      icon: <FiUsers />,
+    },
+    {
+      name: "Trips",
+      path: "/trips",
+      icon: <FiMap />,
+    },
+    {
+      name: "Documents",
+      path: "/documents",
+      icon: <FiFileText />,
+    },
+    {
+      name: "Payment & Balance",
+      path: "/payments",
+      icon: <FiCreditCard />,
+    },
+    {
+      name: "Settings",
+      path: "/settings",
+      icon: <FiSettings />,
+    },
   ];
 
   const handleLogout = () => {
@@ -23,48 +63,52 @@ function Sidebar({ sidebarOpen }) {
   };
 
   return (
-    <div className={`sidebar ${sidebarOpen ? "sidebar-show" : "sidebar-hide"}`}>
+    <aside
+      className={`sidebar ${
+        sidebarOpen ? "sidebar-show" : "sidebar-hide"
+      }`}
+    >
+      {/* Logo */}
+      <div className="sidebar-header">
+        <h2 className="sidebar-logo">TMS Admin</h2>
+      </div>
 
-      {/* LOGO */}
-      <h2 className="navbar-logo" style={{ marginBottom: "32px" }}>
-        TMS Admin
-      </h2>
-
-      <ul>
+      {/* Navigation */}
+      <ul className="sidebar-menu">
         {menuItems.map((item, index) => {
           const isActive =
             location.pathname === item.path ||
-            (item.path === "/vehicles" && location.pathname === "/vehicle-details") ||
-            (item.path === "/trips"    && location.pathname === "/trip-details") ||
-            (item.path === "/payments" && location.pathname === "/payment-details");
+            (item.path === "/vehicles" &&
+              location.pathname === "/vehicle-details") ||
+            (item.path === "/trips" &&
+              location.pathname === "/trip-details") ||
+            (item.path === "/payments" &&
+              location.pathname === "/payment-details");
 
           return (
             <li
               key={index}
+              className={isActive ? "active" : ""}
               onClick={() => navigate(item.path)}
-              style={{ background: isActive ? "#2563eb" : "transparent" }}
             >
-              {item.name}
+              <span className="sidebar-icon">
+                {item.icon}
+              </span>
+
+              <span>{item.name}</span>
             </li>
           );
         })}
-
-        <li
-          onClick={handleLogout}
-          style={{
-            marginTop: "40px",
-            color: "#f87171",
-            fontWeight: "600",
-            border: "1px solid rgba(248, 113, 113, 0.2)"
-          }}
-          onMouseEnter={(e) => e.target.style.background = 'rgba(248, 113, 113, 0.1)'}
-          onMouseLeave={(e) => e.target.style.background = 'transparent'}
-        >
-          🚪 Logout
-        </li>
       </ul>
 
-    </div>
+      {/* Logout */}
+      <div className="sidebar-footer">
+        <div className="logout-btn" onClick={handleLogout}>
+          <FiLogOut />
+          <span>Logout</span>
+        </div>
+      </div>
+    </aside>
   );
 }
 

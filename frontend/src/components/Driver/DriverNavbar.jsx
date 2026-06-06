@@ -14,7 +14,7 @@ function DriverNavbar({ toggleSidebar }) {
         </button>
 
         <div className="brand">
-          <div className="brand-logo">T</div>
+          
           <div>
             <h2>Transport Portal</h2>
             <span>Driver Management System</span>

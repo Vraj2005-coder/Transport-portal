@@ -7,7 +7,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import close_mongo_connection, connect_to_mongo
-from app.routes import auth, vehicles, admin, driver
+from app.routes import auth, admin, vehicles, driver, trips, expenses, payments, upload
+from app.services.scheduler_service import start_scheduler, stop_scheduler
+from fastapi.staticfiles import StaticFiles
+import os
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -16,9 +19,11 @@ from app.routes import auth, vehicles, admin, driver
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Handle MongoDB connection on startup and cleanup on shutdown."""
+    """Handle MongoDB and Scheduler connection on startup and cleanup on shutdown."""
     await connect_to_mongo()
+    start_scheduler()
     yield
+    stop_scheduler()
     await close_mongo_connection()
 
 
@@ -72,8 +77,17 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
+app.include_router(trips.router, prefix="/api/trips", tags=["Trips"])
+app.include_router(expenses.router, prefix="/api/expenses", tags=["Expenses"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(driver.router, prefix="/api/driver", tags=["Driver"])
+app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
+app.include_router(upload.router, prefix="/api/upload", tags=["Upload"])
+
+# Mount uploads directory for serving static files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 
 # ──────────────────────────────────────────────────────────────────────────────

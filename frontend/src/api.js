@@ -7,7 +7,14 @@
  * - If refresh fails (refresh token expired/missing), redirects to login
  */
 
-const BASE_URL = "http://localhost:8000/api";
+export const API_HOST = import.meta.env.VITE_API_HOST || window.location.hostname;
+export const API_PORT = import.meta.env.VITE_API_PORT || "8000";
+export const API_PROTOCOL = window.location.protocol === "https:" ? "https:" : "http:";
+export const WS_PROTOCOL = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+export const SERVER_URL = `${API_PROTOCOL}//${API_HOST}:${API_PORT}`;
+export const BASE_URL = `${SERVER_URL}/api`;
+export const WS_BASE_URL = `${WS_PROTOCOL}//${API_HOST}:${API_PORT}/api`;
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 
@@ -60,7 +67,7 @@ async function apiFetch(path, opts = {}, retry = true) {
   const token = getToken();
 
   const headers = {
-    "Content-Type": "application/json",
+    ...(opts.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...opts.headers,
   };
@@ -130,6 +137,25 @@ export const authAPI = {
   me: () => apiFetch("/auth/me"),
 };
 
+// ─── General File Upload ──────────────────────────────────────────────────────
+
+export const uploadAPI = {
+  uploadFile: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch("/upload/", { method: "POST", body: formData });
+  }
+};
+
+// ─── Expenses ─────────────────────────────────────────────────────────────────
+
+export const expensesAPI = {
+  create: (data) => apiFetch("/expenses/", { method: "POST", body: JSON.stringify(data) }),
+  getByTrip: (tripId) => apiFetch(`/expenses/?trip_id=${tripId}`),
+  getByVehicle: (vehicleId) => apiFetch(`/expenses/?vehicle_id=${vehicleId}`),
+  delete: (id) => apiFetch(`/expenses/${id}`, { method: "DELETE" }),
+};
+
 // ─── Vehicles ─────────────────────────────────────────────────────────────────
 
 export const vehiclesAPI = {
@@ -156,6 +182,28 @@ export const driversAPI = {
 // ─── Driver dashboard ─────────────────────────────────────────────────────────
 
 export const driverAPI = {
-  stats:       () => apiFetch("/driver/stats"),
-  currentTrip: () => apiFetch("/driver/current-trip"),
+  stats:            () =>        apiFetch("/driver/stats"),
+  currentTrip:      () =>        apiFetch("/driver/current-trip"),
+  updateTripStatus: (body) =>    apiFetch("/driver/trip-status", { method: "PUT", body: JSON.stringify(body) }),
+};
+
+// ─── Trips ────────────────────────────────────────────────────────────────────
+
+export const tripsAPI = {
+  list:           ()         => apiFetch("/trips/"),
+  get:            (id)       => apiFetch(`/trips/${id}`),
+  create:         (body)     => apiFetch("/trips/", { method: "POST", body: JSON.stringify(body) }),
+  update:         (id, body) => apiFetch(`/trips/${id}`, { method: "PUT",  body: JSON.stringify(body) }),
+  cancel:         (id)       => apiFetch(`/trips/${id}`, { method: "DELETE" }),
+  deleteAll:      ()         => apiFetch("/trips/all", { method: "DELETE" }),
+  addDutyLog:     (id, body) => apiFetch(`/trips/${id}/duty-log`, { method: "POST", body: JSON.stringify(body) }),
+  updateLocation: (id, body) => apiFetch(`/trips/${id}/location`, { method: "PUT",  body: JSON.stringify(body) }),
+};
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+export const paymentsAPI = {
+  list:   ()       => apiFetch("/payments/"),
+  create: (body)   => apiFetch("/payments/", { method: "POST", body: JSON.stringify(body) }),
+  delete: (id)     => apiFetch(`/payments/${id}`, { method: "DELETE" }),
 };

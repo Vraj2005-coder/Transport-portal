@@ -1,0 +1,232 @@
+/* =========================================
+   DRIVER TOPBAR
+========================================= */
+
+.driver-navbar{
+  height:70px;
+
+  background:#ffffff;
+
+  border-bottom:1px solid #e2e8f0;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 15px;
+
+  position:sticky;
+  top:0;
+
+  z-index:999;
+  width:100%;
+}
+
+/* =========================================
+   LEFT
+========================================= */
+
+.navbar-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.menu-btn{
+  width:40px;
+  height:40px;
+
+  border:none;
+
+  background:#f8fafc;
+
+  border:1px solid #e2e8f0;
+
+  border-radius:10px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#475569;
+
+  font-size:20px;
+
+  cursor:pointer;
+
+  transition:.2s ease;
+}
+
+.menu-btn:hover{
+  background:#f1f5f9;
+}
+
+.brand{
+  display:flex;
+  flex-direction:column;
+}
+
+.brand h2{
+  margin:0;
+
+  font-size:20px;
+  font-weight:600;
+
+  color:#0f172a;
+
+  line-height:1;
+}
+
+.brand span{
+  margin-top:2px;
+
+  font-size:11px;
+
+  color:#64748b;
+}
+
+/* =========================================
+   RIGHT
+========================================= */
+
+.navbar-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* =========================================
+   NOTIFICATION
+========================================= */
+
+.notification{
+  width:40px;
+  height:40px;
+
+  border:none;
+
+  background:#f8fafc;
+
+  border:1px solid #e2e8f0;
+
+  border-radius:10px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#475569;
+
+  font-size:18px;
+
+  cursor:pointer;
+
+  transition:.2s ease;
+
+  position:relative;
+}
+
+.notification:hover{
+  background:#f1f5f9;
+}
+
+.notification-badge{
+  position:absolute;
+
+  top:6px;
+  right:6px;
+
+  width:8px;
+  height:8px;
+
+  border-radius:50%;
+
+  background:#ef4444;
+}
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.driver-profile{
+  display:flex;
+  align-items:center;
+
+  gap:10px;
+
+  padding:5px 10px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  transition:.2s ease;
+}
+
+.driver-profile:hover{
+  background:#f8fafc;
+}
+
+.profile-avatar{
+  width:36px;
+  height:36px;
+
+  border-radius:50%;
+
+  background:#001453;
+
+  color:#ffffff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:14px;
+  font-weight:700;
+}
+
+.profile-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.profile-info h4{
+  margin:0;
+
+  font-size:14px;
+  font-weight:600;
+
+  color:#0f172a;
+}
+
+.profile-info p{
+  margin:0;
+
+  font-size:11px;
+
+  color:#64748b;
+}
+
+.profile-arrow{
+  font-size:14px;
+
+  color:#94a3b8;
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:768px){
+
+  .driver-navbar{
+    padding:0 16px;
+  }
+
+  .profile-info,
+  .profile-arrow{
+    display:none;
+  }
+}
+
+

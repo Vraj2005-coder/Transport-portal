@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import "../../styles/Admin/AdminRegister.css";
+import { BASE_URL } from "../../api";
 
 function AdminRegister() {
 
@@ -88,7 +89,7 @@ function AdminRegister() {
     try {
 
       const response = await fetch(
-        "http://localhost:8000/api/auth/register/owner",
+        `${BASE_URL}/auth/register/owner`,
         {
           method: "POST",
           headers: {

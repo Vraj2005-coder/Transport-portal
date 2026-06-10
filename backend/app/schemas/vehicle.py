@@ -23,6 +23,11 @@ class VehicleCreateRequest(BaseModel):
     puc: Optional[str] = None
     status: str = "Active"              # "Active" | "Booked" | "Maintenance"
     location: Optional[str] = None
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 
 class VehicleUpdateRequest(BaseModel):
@@ -38,7 +43,11 @@ class VehicleUpdateRequest(BaseModel):
     puc: Optional[str] = None
     status: Optional[str] = None
     location: Optional[str] = None
-
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Response schemas
@@ -58,6 +67,11 @@ class VehicleResponse(BaseModel):
     puc: Optional[str] = None
     status: str
     location: Optional[str] = None
+    truck_size: Optional[str] = None
+    body_type: Optional[str] = None
+    truck_category: Optional[str] = None
+    bus_type: Optional[str] = None
+    seating_capacity: Optional[str] = None
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -129,8 +143,32 @@ class DriverStatsResponse(BaseModel):
 
 
 class CurrentTripResponse(BaseModel):
-    """Response for GET /api/driver/current-trip"""
-    vehicle: Optional[str] = None
-    route: Optional[str] = None
-    status: Optional[str] = None
-    distance: Optional[str] = None
+    """Response for GET /api/driver/current-trip — full trip data for the driver map."""
+    # Trip identifiers
+    id: Optional[str] = None
+    trip_id: Optional[str] = None
+
+    # Vehicle info
+    vehicle: Optional[str] = None           # Vehicle number
+    vehicle_id: Optional[str] = None
+    vehicle_type: Optional[str] = None
+
+    # Route
+    pickup_location: Optional[str] = None
+    drop_location: Optional[str] = None
+    reporting_time: Optional[str] = None
+
+    # Status
+    status: Optional[str] = None            # "Scheduled" | "On Trip" | "Completed" | "Cancelled"
+    started_at: Optional[str] = None        # ISO timestamp
+
+    # Client
+    client_name: Optional[str] = None
+    client_phone: Optional[str] = None
+
+    # GPS (driver's current position stored in DB)
+    driver_lat: Optional[float] = None
+    driver_lng: Optional[float] = None
+
+    # Notes
+    notes: Optional[str] = None

@@ -50,7 +50,7 @@ async def get_admin_stats(current_owner=Depends(require_owner)):
     return AdminStatsResponse(
         total_vehicles=stats["total_vehicles"],
         active_drivers=active_drivers,
-        trips_today=stats["booked_vehicles"], # Dynamically match booked vehicles count
+        trips_today=stats["trips_today"],
         pending_documents=stats["pending_documents_count"],
         available_vehicles=stats["available_vehicles"],
         booked_vehicles=stats["booked_vehicles"],

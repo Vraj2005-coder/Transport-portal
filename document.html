@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Driver Documents – TMS Admin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:         #1a2035;
+      --navy-mid:     #243050;
+      --navy-light:   #2e3d63;
+      --accent-red:   #e53e3e;
+      --blue:         #3b82f6;
+      --blue-light:   #eff6ff;
+      --green:        #22c55e;
+      --green-light:  #f0fdf4;
+      --orange:       #f97316;
+      --orange-light: #fff7ed;
+      --yellow:       #eab308;
+      --yellow-light: #fefce8;
+      --text:         #111827;
+      --text-mid:     #4b5563;
+      --text-light:   #9ca3af;
+      --border:       #e5e7eb;
+      --bg:           #f3f4f6;
+      --white:        #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      padding: 0 22px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      letter-spacing: -.3px;
+    }
+    .sidebar-nav { padding: 16px 10px; flex: 1; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 2px;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+    .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 10px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── MAIN AREA ── */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left h2 { font-size: 17px; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: 11.5px; color: var(--text-light); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .avatar {
+      width: 34px; height: 34px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px;
+    }
+    .owner-label { font-size: 12px; color: var(--text-mid); font-weight: 500; }
+
+    /* ── CONTENT ── */
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+    .breadcrumb span { color: var(--navy); font-weight: 600; }
+
+    /* ── DRIVER SELECTOR CARD ── */
+    .selector-card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+    .selector-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    /* Custom dropdown */
+    .custom-select-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 340px;
+    }
+    .custom-select-wrap select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 40px 10px 14px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    .custom-select-wrap select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .custom-select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .driver-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .driver-chip .chip-avatar {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      flex: 1;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stat-card.blue   { background: var(--blue-light); }
+    .stat-card.green  { background: var(--green-light); }
+    .stat-card.orange { background: var(--orange-light); }
+    .stat-card.red    { background: #fef2f2; }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--text-mid); }
+    .stat-value { font-size: 22px; font-weight: 800; margin-top: 3px; }
+    .stat-card.blue   .stat-value { color: var(--blue); }
+    .stat-card.green  .stat-value { color: #16a34a; }
+    .stat-card.orange .stat-value { color: var(--orange); }
+    .stat-card.red    .stat-value { color: var(--accent-red); }
+    .stat-icon { font-size: 22px; }
+
+    /* ── MAIN GRID ── */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    /* ── DOCUMENT CARD ── */
+    .doc-card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .doc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .doc-type-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .doc-type-icon.license  { background: var(--blue-light); }
+    .doc-type-icon.rc       { background: var(--green-light); }
+    .doc-type-icon.insurance{ background: var(--orange-light); }
+    .doc-type-icon.fitness  { background: var(--yellow-light); }
+    .doc-type-icon.permit   { background: #fdf4ff; }
+    .doc-type-icon.pollution{ background: #f0fdf4; }
+    .doc-card-title h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+    .doc-card-title p  { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+    /* STATUS PILL */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-pill.valid   { background: var(--green-light);  color: #16a34a; }
+    .status-pill.expiring{ background: var(--yellow-light); color: #92400e; }
+    .status-pill.expired { background: #fef2f2;             color: var(--accent-red); }
+    .status-pill.missing { background: var(--bg);           color: var(--text-light); }
+
+    /* DOC BODY */
+    .doc-card-body { padding: 16px 18px; }
+
+    .doc-info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .doc-info-item { flex: 1; }
+    .doc-info-item label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text-light);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .doc-info-item span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-icon { font-size: 22px; margin-bottom: 4px; }
+    .upload-zone p {
+      font-size: 12px;
+      color: var(--text-mid);
+      font-weight: 500;
+    }
+    .upload-zone small {
+      font-size: 10.5px;
+      color: var(--text-light);
+      display: block;
+      margin-top: 3px;
+    }
+
+    /* UPLOADED FILE PREVIEW */
+    .file-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+    .file-preview .file-icon { font-size: 20px; }
+    .file-preview .file-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-preview .file-size { font-size: 11px; color: var(--text-light); }
+    .file-preview .file-remove {
+      background: none;
+      border: none;
+      color: var(--accent-red);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 2px;
+      line-height: 1;
+    }
+
+    /* PROGRESS BAR */
+    .upload-progress { margin-top: 8px; display: none; }
+    .progress-bar-bg {
+      background: var(--border);
+      border-radius: 999px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: var(--blue);
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width .3s ease;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* ERROR / SUCCESS MSG */
+    .msg {
+      display: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .msg.error   { background: #fef2f2; color: var(--accent-red); display: block; }
+    .msg.success { background: var(--green-light); color: #16a34a; display: block; }
+
+    /* UPLOAD BUTTON */
+    .upload-btn {
+      margin-top: 10px;
+      width: 100%;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background .15s;
+      display: none;
+    }
+    .upload-btn:hover { background: var(--navy-light); }
+    .upload-btn.visible { display: block; }
+
+    /* VIEW DOC LINK */
+    .view-doc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue);
+      background: var(--blue-light);
+      border-radius: 7px;
+      padding: 5px 11px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
+      text-decoration: none;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all .25s;
+      z-index: 999;
+      max-width: 300px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-left: 4px solid var(--green); }
+    .toast.error   { border-left: 4px solid var(--accent-red); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">TMS Admin</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="#">        <span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="#">        <span class="nav-icon">🚚</span> Vehicles</a>
+    <a class="nav-item" href="#">        <span class="nav-icon">👤</span> Drivers</a>
+    <a class="nav-item" href="#">        <span class="nav-icon">🗺️</span> Trips</a>
+    <a class="nav-item active" href="#">  <span class="nav-icon">📄</span> Documents</a>
+    <a class="nav-item" href="#">        <span class="nav-icon">💳</span> Payment & Balance</a>
+    <a class="nav-item" href="#">        <span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="logout-btn">↪ Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h2>Driver Documents</h2>
+      <p>Transport Management System</p>
+    </div>
+    <div class="topbar-right">
+      <span class="owner-label">komal · owner</span>
+      <div class="avatar">K</div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="breadcrumb">Dashboard › Documents › <span>Driver Documents</span></div>
+
+    <!-- DRIVER SELECTOR -->
+    <div class="selector-card">
+      <span class="selector-label">Select Driver</span>
+      <div class="custom-select-wrap">
+        <select id="driverSelect" onchange="selectDriver(this.value)">
+          <option value="">— Choose a driver —</option>
+          <option value="DRV001">Ramesh Kumar (DRV001)</option>
+          <option value="DRV002">Suresh Reddy (DRV002)</option>
+          <option value="DRV003">Mahesh Yadav (DRV003)</option>
+          <option value="DRV004">Rajesh Singh (DRV004)</option>
+          <option value="DRV005">Venkat Naidu (DRV005)</option>
+        </select>
+      </div>
+      <div class="driver-chip" id="driverChip" style="display:none;">
+        <div class="chip-avatar" id="chipInitial">R</div>
+        <span id="chipName">Ramesh Kumar</span>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow" style="display:none;">
+      <div class="stat-card blue">
+        <div><div class="stat-label">Total Documents</div><div class="stat-value" id="statTotal">6</div></div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card green">
+        <div><div class="stat-label">Valid</div><div class="stat-value" id="statValid">3</div></div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card orange">
+        <div><div class="stat-label">Expiring Soon</div><div class="stat-value" id="statExpiring">1</div></div>
+        <div class="stat-icon">⚠️</div>
+      </div>
+      <div class="stat-card red">
+        <div><div class="stat-label">Expired / Missing</div><div class="stat-value" id="statExpired">2</div></div>
+        <div class="stat-icon">❌</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENT CARDS GRID -->
+    <div class="doc-grid" id="docGrid" style="display:none;">
+
+      <!-- 1. Driving Licence -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon license">🪪</div>
+            <div>
+              <h3>Driving Licence</h3>
+              <p>Mandatory · Personal</p>
+            </div>
+          </div>
+          <span class="status-pill valid">● Valid</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Doc Number</label>
+              <span>AP09 20110012345</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Issue Date</label>
+              <span>12-Jan-2019</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Expiry Date</label>
+              <span>11-Jan-2029</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-dl"
+               ondragover="dragOver(event,'zone-dl')"
+               ondragleave="dragLeave('zone-dl')"
+               ondrop="dropFile(event,'zone-dl','msg-dl','btn-dl')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-dl','msg-dl','btn-dl')"/>
+            <div class="upload-icon">📤</div>
+            <p>Drag & drop or click to replace</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-dl"></div>
+          <div class="file-preview" id="preview-dl" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-dl"></span>
+            <span class="file-size" id="fsize-dl"></span>
+            <button class="file-remove" onclick="removeFile('zone-dl','msg-dl','btn-dl','preview-dl')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-dl" onclick="uploadFile('btn-dl','msg-dl','zone-dl','preview-dl')">
+            ↑ Upload Document
+          </button>
+          <a class="view-doc-btn" href="#" onclick="return false;">👁 View Current</a>
+        </div>
+      </div>
+
+      <!-- 2. Aadhar Card -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon rc">🪪</div>
+            <div>
+              <h3>Aadhar Card</h3>
+              <p>Mandatory · Identity Proof</p>
+            </div>
+          </div>
+          <span class="status-pill valid">● Valid</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Aadhar No</label>
+              <span>XXXX XXXX 4521</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Linked Mobile</label>
+              <span>+91 99000 12345</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Status</label>
+              <span style="color:#16a34a;">Verified</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-aa"
+               ondragover="dragOver(event,'zone-aa')"
+               ondragleave="dragLeave('zone-aa')"
+               ondrop="dropFile(event,'zone-aa','msg-aa','btn-aa')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-aa','msg-aa','btn-aa')"/>
+            <div class="upload-icon">📤</div>
+            <p>Drag & drop or click to replace</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-aa"></div>
+          <div class="file-preview" id="preview-aa" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-aa"></span>
+            <span class="file-size" id="fsize-aa"></span>
+            <button class="file-remove" onclick="removeFile('zone-aa','msg-aa','btn-aa','preview-aa')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-aa" onclick="uploadFile('btn-aa','msg-aa','zone-aa','preview-aa')">
+            ↑ Upload Document
+          </button>
+          <a class="view-doc-btn" href="#" onclick="return false;">👁 View Current</a>
+        </div>
+      </div>
+
+      <!-- 3. Vehicle Insurance -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon insurance">🛡️</div>
+            <div>
+              <h3>Vehicle Insurance</h3>
+              <p>Mandatory · Annual Renewal</p>
+            </div>
+          </div>
+          <span class="status-pill expiring">⏳ Expiring Soon</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Policy No</label>
+              <span>INS/2023/00921</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Issue Date</label>
+              <span>01-Jul-2023</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Expiry Date</label>
+              <span style="color:#92400e;">30-Jun-2024</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-ins"
+               ondragover="dragOver(event,'zone-ins')"
+               ondragleave="dragLeave('zone-ins')"
+               ondrop="dropFile(event,'zone-ins','msg-ins','btn-ins')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-ins','msg-ins','btn-ins')"/>
+            <div class="upload-icon">📤</div>
+            <p>Drag & drop or click to upload renewal</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-ins"></div>
+          <div class="file-preview" id="preview-ins" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-ins"></span>
+            <span class="file-size" id="fsize-ins"></span>
+            <button class="file-remove" onclick="removeFile('zone-ins','msg-ins','btn-ins','preview-ins')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-ins" onclick="uploadFile('btn-ins','msg-ins','zone-ins','preview-ins')">
+            ↑ Upload Document
+          </button>
+          <a class="view-doc-btn" href="#" onclick="return false;">👁 View Current</a>
+        </div>
+      </div>
+
+      <!-- 4. Fitness Certificate -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon fitness">🔧</div>
+            <div>
+              <h3>Fitness Certificate</h3>
+              <p>Vehicle · Annual Renewal</p>
+            </div>
+          </div>
+          <span class="status-pill expired">● Expired</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Certificate No</label>
+              <span>FC/AP/2022/8834</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Issue Date</label>
+              <span>15-Mar-2022</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Expiry Date</label>
+              <span style="color:#e53e3e;">14-Mar-2023</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-fc"
+               ondragover="dragOver(event,'zone-fc')"
+               ondragleave="dragLeave('zone-fc')"
+               ondrop="dropFile(event,'zone-fc','msg-fc','btn-fc')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-fc','msg-fc','btn-fc')"/>
+            <div class="upload-icon">📤</div>
+            <p>Upload new fitness certificate</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-fc"></div>
+          <div class="file-preview" id="preview-fc" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-fc"></span>
+            <span class="file-size" id="fsize-fc"></span>
+            <button class="file-remove" onclick="removeFile('zone-fc','msg-fc','btn-fc','preview-fc')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-fc" onclick="uploadFile('btn-fc','msg-fc','zone-fc','preview-fc')">
+            ↑ Upload Document
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. National Permit -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon permit">📑</div>
+            <div>
+              <h3>National Permit</h3>
+              <p>Vehicle · Multi-year</p>
+            </div>
+          </div>
+          <span class="status-pill valid">● Valid</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Permit No</label>
+              <span>NP/AP/2021/4410</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Issue Date</label>
+              <span>20-Jun-2021</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Expiry Date</label>
+              <span>19-Jun-2026</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-np"
+               ondragover="dragOver(event,'zone-np')"
+               ondragleave="dragLeave('zone-np')"
+               ondrop="dropFile(event,'zone-np','msg-np','btn-np')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-np','msg-np','btn-np')"/>
+            <div class="upload-icon">📤</div>
+            <p>Drag & drop or click to replace</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-np"></div>
+          <div class="file-preview" id="preview-np" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-np"></span>
+            <span class="file-size" id="fsize-np"></span>
+            <button class="file-remove" onclick="removeFile('zone-np','msg-np','btn-np','preview-np')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-np" onclick="uploadFile('btn-np','msg-np','zone-np','preview-np')">
+            ↑ Upload Document
+          </button>
+          <a class="view-doc-btn" href="#" onclick="return false;">👁 View Current</a>
+        </div>
+      </div>
+
+      <!-- 6. Pollution Certificate (PUC) -->
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <div class="doc-card-title">
+            <div class="doc-type-icon pollution">🌿</div>
+            <div>
+              <h3>Pollution Certificate (PUC)</h3>
+              <p>Vehicle · 6-month Renewal</p>
+            </div>
+          </div>
+          <span class="status-pill missing">○ Not Uploaded</span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-info-row">
+            <div class="doc-info-item">
+              <label>Certificate No</label>
+              <span style="color:var(--text-light);">—</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Issue Date</label>
+              <span style="color:var(--text-light);">—</span>
+            </div>
+            <div class="doc-info-item">
+              <label>Expiry Date</label>
+              <span style="color:var(--text-light);">—</span>
+            </div>
+          </div>
+          <div class="upload-zone" id="zone-puc"
+               ondragover="dragOver(event,'zone-puc')"
+               ondragleave="dragLeave('zone-puc')"
+               ondrop="dropFile(event,'zone-puc','msg-puc','btn-puc')">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                   onchange="handleFile(this,'zone-puc','msg-puc','btn-puc')"/>
+            <div class="upload-icon">📤</div>
+            <p>Upload PUC certificate</p>
+            <small>PDF, JPG, PNG · Max 10 MB</small>
+          </div>
+          <div class="msg" id="msg-puc"></div>
+          <div class="file-preview" id="preview-puc" style="display:none;">
+            <span class="file-icon">📎</span>
+            <span class="file-name" id="fname-puc"></span>
+            <span class="file-size" id="fsize-puc"></span>
+            <button class="file-remove" onclick="removeFile('zone-puc','msg-puc','btn-puc','preview-puc')">✕</button>
+          </div>
+          <button class="upload-btn" id="btn-puc" onclick="uploadFile('btn-puc','msg-puc','zone-puc','preview-puc')">
+            ↑ Upload Document
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /doc-grid -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const MAX_MB   = 10;
+  const MAX_BYTES = MAX_MB * 1024 * 1024;
+  const ALLOWED  = ['application/pdf','image/jpeg','image/png'];
+  const EXT_LABEL = 'PDF, JPG, PNG';
+
+  /* ── Driver select ── */
+  function selectDriver(val) {
+    const chip  = document.getElementById('driverChip');
+    const stats = document.getElementById('statsRow');
+    const grid  = document.getElementById('docGrid');
+    if (!val) {
+      chip.style.display  = 'none';
+      stats.style.display = 'none';
+      grid.style.display  = 'none';
+      return;
+    }
+    const sel  = document.getElementById('driverSelect');
+    const name = sel.options[sel.selectedIndex].text.split(' (')[0];
+    document.getElementById('chipInitial').textContent = name[0];
+    document.getElementById('chipName').textContent    = name;
+    chip.style.display  = 'flex';
+    stats.style.display = 'flex';
+    grid.style.display  = 'grid';
+  }
+
+  /* ── File size helper ── */
+  function fmtSize(bytes) {
+    if (bytes < 1024)         return bytes + ' B';
+    if (bytes < 1024*1024)    return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(2) + ' MB';
+  }
+
+  /* ── Drag events ── */
+  function dragOver(e, zoneId) {
+    e.preventDefault();
+    document.getElementById(zoneId).classList.add('drag-over');
+  }
+  function dragLeave(zoneId) {
+    document.getElementById(zoneId).classList.remove('drag-over');
+  }
+  function dropFile(e, zoneId, msgId, btnId) {
+    e.preventDefault();
+    dragLeave(zoneId);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file, zoneId, msgId, btnId);
+  }
+
+  /* ── Input change ── */
+  function handleFile(input, zoneId, msgId, btnId) {
+    if (input.files[0]) processFile(input.files[0], zoneId, msgId, btnId);
+  }
+
+  /* ── Core file processor ── */
+  function processFile(file, zoneId, msgId, btnId) {
+    const msg     = document.getElementById(msgId);
+    const btn     = document.getElementById(btnId);
+    const suffix  = zoneId.split('-')[1];
+    const preview = document.getElementById('preview-' + suffix);
+    const fname   = document.getElementById('fname-'   + suffix);
+    const fsize   = document.getElementById('fsize-'   + suffix);
+
+    msg.className = 'msg';
+    msg.style.display = 'none';
+
+    // Validate type
+    if (!ALLOWED.includes(file.type)) {
+      msg.textContent   = `❌ Invalid file type. Only ${EXT_LABEL} allowed.`;
+      msg.className     = 'msg error';
+      return;
+    }
+    // Validate size
+    if (file.size > MAX_BYTES) {
+      msg.textContent = `❌ File too large: ${fmtSize(file.size)}. Max is ${MAX_MB} MB.`;
+      msg.className   = 'msg error';
+      return;
+    }
+
+    // Show preview
+    fname.textContent = file.name;
+    fsize.textContent = fmtSize(file.size);
+    preview.style.display = 'flex';
+    btn.classList.add('visible');
+    msg.style.display = 'none';
+  }
+
+  /* ── Remove file ── */
+  function removeFile(zoneId, msgId, btnId, previewId) {
+    document.getElementById(previewId).style.display = 'none';
+    document.getElementById(btnId).classList.remove('visible');
+    const msg = document.getElementById(msgId);
+    msg.className = 'msg';
+    msg.style.display = 'none';
+    // Reset input
+    const input = document.querySelector('#' + zoneId + ' input[type=file]');
+    if (input) input.value = '';
+  }
+
+  /* ── Simulate upload with progress ── */
+  function uploadFile(btnId, msgId, zoneId, previewId) {
+    const btn = document.getElementById(btnId);
+    btn.disabled    = true;
+    btn.textContent = 'Uploading…';
+
+    // Fake progress
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 30;
+      if (pct >= 100) {
+        pct = 100;
+        clearInterval(iv);
+        // Done
+        btn.classList.remove('visible');
+        btn.disabled    = false;
+        btn.textContent = '↑ Upload Document';
+        document.getElementById(previewId).style.display = 'none';
+        const msg = document.getElementById(msgId);
+        msg.textContent   = '✅ Document uploaded successfully.';
+        msg.className     = 'msg success';
+        showToast('Document uploaded successfully!', 'success');
+      }
+    }, 300);
+  }
+
+  /* ── Toast ── */
+  function showToast(text, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = text;
+    t.className   = `toast ${type} show`;
+    setTimeout(() => { t.className = `toast ${type}`; }, 3000);
+  }
+</script>
+</body>
+</html>
